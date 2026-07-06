@@ -2,54 +2,78 @@
 
 import { useEffect, useRef, useState } from "react";
 import { getSocket } from "@/lib/socket/client";
-import { videoLoop } from "@/lib/temas";
+import { assets, buscarTema } from "@/lib/sala1/temas";
+import type { Estado } from "@/lib/sala1/estado";
+
+function videoDoEstado(estado: Estado): { src: string; loop: boolean; avisaFim: boolean } {
+  switch (estado.tipo) {
+    case "standby":
+      return { src: assets.standby.video, loop: true, avisaFim: false };
+    case "menu":
+      return {
+        src: estado.variante === "apos-sim" ? assets.menuAposSim.video : assets.menu.video,
+        loop: false,
+        avisaFim: false,
+      };
+    case "tema":
+      return { src: buscarTema(estado.temaId).video, loop: false, avisaFim: true };
+    case "fim-video":
+      return { src: assets.fimVideo.video, loop: false, avisaFim: false };
+    case "encerrando":
+      return { src: assets.encerrando.video, loop: false, avisaFim: true };
+  }
+}
 
 export default function Sala1TvPage() {
-  const [video, setVideo] = useState(videoLoop);
-  const [emLoop, setEmLoop] = useState(true);
+  const [estado, setEstado] = useState<Estado>({ tipo: "standby" });
+  const [audioBloqueado, setAudioBloqueado] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
     const socket = getSocket();
     socket.emit("sala1:entrar", { papel: "tv" });
-
-    socket.on("sala1:tocar-video", ({ video }) => {
-      setVideo(video);
-      setEmLoop(false);
-    });
-
-    socket.on("sala1:voltar-loop", () => {
-      setVideo(videoLoop);
-      setEmLoop(true);
-    });
-
+    socket.on("sala1:estado", setEstado);
     return () => {
-      socket.off("sala1:tocar-video");
-      socket.off("sala1:voltar-loop");
+      socket.off("sala1:estado", setEstado);
     };
   }, []);
 
-  useEffect(() => {
-    videoRef.current?.play().catch(() => {});
-  }, [video]);
+  const { src, loop, avisaFim } = videoDoEstado(estado);
 
-  function aoTerminarVideo() {
-    if (emLoop) return;
-    getSocket().emit("sala1:video-finalizado");
+  useEffect(() => {
+    videoRef.current
+      ?.play()
+      .then(() => setAudioBloqueado(false))
+      .catch(() => setAudioBloqueado(true));
+  }, [src]);
+
+  function habilitarAudio() {
+    videoRef.current
+      ?.play()
+      .then(() => setAudioBloqueado(false))
+      .catch(() => {});
   }
 
   return (
-    <main className="h-screen w-screen bg-black">
+    <main className="relative h-screen w-screen bg-black">
       <video
         ref={videoRef}
-        key={video}
-        src={video}
+        key={src}
+        src={src}
         autoPlay
-        muted={emLoop}
-        loop={emLoop}
-        onEnded={aoTerminarVideo}
+        muted={loop}
+        loop={loop}
+        onEnded={() => avisaFim && getSocket().emit("sala1:video-finalizado")}
         className="h-full w-full object-cover"
       />
+      {audioBloqueado && (
+        <button
+          onClick={habilitarAudio}
+          className="absolute inset-0 flex items-center justify-center bg-black/60 text-2xl text-white"
+        >
+          Toque para habilitar o som
+        </button>
+      )}
     </main>
   );
 }

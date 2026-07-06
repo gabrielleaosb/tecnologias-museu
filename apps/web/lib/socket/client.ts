@@ -1,7 +1,7 @@
 "use client";
 
 import { io, type Socket } from "socket.io-client";
-import type { ClientToServerEvents, ServerToClientEvents } from "@/lib/socket/events";
+import type { ClientToServerEvents, ServerToClientEvents } from "@/lib/socket/eventos";
 
 let socket: Socket<ServerToClientEvents, ClientToServerEvents> | null = null;
 

@@ -17,20 +17,33 @@ Sistema interativo para o Museu do Sertão de Piranhas, Alagoas. Composto por 3 
 ### 1. Sala 1 — Kiosk Interativo com Maquete
 
 **O que faz:**  
-Tablet exibe tela em loop de boas-vindas. Visitante seleciona um tema. Um vídeo sobre o tema é reproduzido. Ao terminar, volta ao loop. Em sincronia, o sistema aciona o MadMapper para iluminar/projetar na maquete física conforme o tema escolhido.
+Tablet exibe tela em loop de boas-vindas ("Maria", assistente virtual do museu, guia a experiência por vídeo). Visitante seleciona um tema. Um vídeo sobre o tema é reproduzido na TV. Ao terminar (ou se o visitante pular), a TV pergunta se ele quer ver outro tema. Roteiro completo em `apps/web/roteiro-sala1.txt`.
 
-**Temas:**
-- Cangaço
+**Temas (5, não 4 — "O Museu" foi adicionado):**
+- O Cangaço
 - A Cidade
-- Rio São Francisco
+- O Rio São Francisco
 - A Ferrovia
+- O Museu
 
-**Dispositivos:** 2 telas físicas sincronizadas — um **tablet** (interação do visitante) e uma **TV** (onde o vídeo do tema realmente toca). A Sala 1 **não** integra com o MadMapper — essa integração é de outra sala (a definir).
+**Dispositivos:** 2 telas físicas sincronizadas — um **tablet** (mostra imagens estáticas com áreas clicáveis/hotspots sobre os botões) e uma **TV** (onde os vídeos tocam: standby, intro da Maria, vídeo do tema, pergunta de encerramento). A Sala 1 **não** integra com o MadMapper — essa integração é de outra sala (a definir).
 
-**Fluxo:**  
-`Tablet: loop de boas-vindas → visitante seleciona tema` → `TV: troca do loop para o vídeo do tema → ao terminar, volta ao loop` → `Tablet: volta à tela de seleção`
+**Máquina de estados (implementada em `lib/sala1/estado.ts`):**
+```
+standby → (iniciar) → menu → (seleciona tema) → tema
+tema → (clica "sair"/"encerrar" OU vídeo termina) → fim-video
+fim-video → (SIM) → menu (variante "após escolher sim", outro vídeo de transição da Maria)
+fim-video → (NÃO) → encerrando → (vídeo termina) → standby
+menu / fim-video → (1 min sem interação) → standby
+```
 
-Sincronização tablet ↔ TV em tempo real via WebSocket (Socket.IO), mediada pelo servidor.
+**Assets:** imagens do tablet em `public/images/sala1/`, vídeos da TV em `public/videos/sala1/` (nomes normalizados, sem acento/espaço — os originais enviados tinham nomes como "7.2 - Tablet-(7.2)-NÃO.jpg").
+
+Sincronização tablet ↔ TV em tempo real via WebSocket (Socket.IO), com o servidor mantendo o estado autoritativo (o tablet nunca decide sozinho o que a TV mostra).
+
+**✅ Status atual (2026-07-06): funcional em teste local.** Fluxo completo testado manualmente (tablet + TV em dois navegadores/dispositivos na mesma rede) — hotspots calibrados e confirmados pelo Gabriel, troca de vídeo na TV funcionando (com fallback de "toque para habilitar o som" quando o navegador bloqueia autoplay com áudio — não deve ocorrer no kiosk real, que roda com a flag `--autoplay-policy=no-user-gesture-required`).
+
+**Ainda não testado/pendente:** build e execução via Docker Compose (imagem só foi validada com `npm run build`, não com `docker build`), deploy na VPS, teste no tablet/TV físicos do museu (touch real, resolução real do dispositivo), modo kiosk do Chromium.
 
 ---
 
@@ -175,5 +188,6 @@ SUPORTE PÓS-INAUGURAÇÃO (opcional — propor ao cliente)
 
 - **MadMapper API:** porta 8080, trigger via HTTP GET, ex. `GET http://localhost:8080/action?name=cangaco`. Não é usada pela Sala 1 — pertence a outra sala, a mapear.
 - **Docker Compose:** 3 serviços — `web` (Next.js + Socket.IO), `db` (Postgres), `caddy` (reverse proxy/TLS). Mesma stack sobe em VPS ou localmente.
+- **Chromium kiosk da TV precisa da flag `--autoplay-policy=no-user-gesture-required`** — a TV troca de vídeo sozinha (via WebSocket, sem clique/touch), e navegadores bloqueiam autoplay com som sem essa flag ou uma interação prévia do usuário. Sem ela, o vídeo troca mas não toca.
 - **AnyDesk:** instalado em cada PC para acesso remoto de Gabriel em caso de problema físico no dispositivo
 - **LGPD:** com a mudança para VPS, fotos e vídeos dos visitantes (Escada) passam a trafegar e ficar armazenados no servidor central — revisar política de privacidade/termo de uso de imagem considerando esse armazenamento remoto (antes seria só local)

@@ -1,0 +1,144 @@
+
+(0) Vídeo de Standby
+INICIAR
+(1) MENU
+Seja bem-vindo(a) ao Museu do Sertão, em Piranhas, Alagoas.
+Eu me chamo Maria e tenho o prazer de receber você.
+Estou aqui para guiá-lo(a) nesta experiência e apresentar mais sobre a história, a cultura e as tradições do sertão.
+Para começar, selecione no tablet abaixo o tema que deseja explorar.
+
+*Se nao receber resposta por 1min, voltar pra tela standby
+
+
+
+
+(x.4) MENU - Após escolher SIM
+Certo, você escolheu SIM
+Selecione no tablet abaixo o novo tema que deseja explorar.
+(2) Cangaço
+(O vídeo começa automaticamente ao clicar)
+X
+Para mais informações visite a sala 8 e 9
+
+(2.0) Tela acessa escrito ‘’ENCERRAR’’, vai direto pro final (2.1)
+
+(2.1) (Fim do vídeo)
+Quer saber mais sobre os outros temas?
+
+(2.2) SIM
+Selecione no tablet abaixo o tema que deseja explorar.
+(2) O Cangaço
+(3) A Cidade
+(4) O Rio São Francisco
+(5) A Ferrovia
+(6) O Museu
+
+(2.3) NÃO
+Ok! Vamos encerrar por aqui.
+Sempre que precisar, é só me chamar novamente.
+
+(0) Volta pro Standby 
+
+(3) A Cidade
+(O vídeo começa automaticamente ao clicar)
+X
+Para mais informações visite a sala 8 e 9
+
+(3.0) Tela acessa escrito ‘’ENCERRAR’’, vai direto pro final (2.1)
+
+(3.1) (Fim do vídeo)
+Quer saber mais sobre os outros temas?
+
+(3.2) SIM
+Selecione no tablet abaixo o tema que deseja explorar.
+(2) O Cangaço
+(3) A Cidade
+(4) O Rio São Francisco
+(5) A Ferrovia
+(6) O Museu
+
+(3.3) NÃO
+Ok! Vamos encerrar por aqui.
+Sempre que precisar, é só me chamar novamente.
+
+(0) Volta pro Standby 
+
+
+(4) Rio São Francisco
+(O vídeo começa automaticamente ao clicar)
+X
+Para mais informações visite a sala 8 e 9
+
+(4.0) Tela acessa escrito ‘’ENCERRAR’’, vai direto pro final (2.1)
+
+(4.1) (Fim do vídeo)
+Quer saber mais sobre os outros temas?
+
+(4.2) SIM
+Selecione no tablet abaixo o tema que deseja explorar.
+(2) O Cangaço
+(3) A Cidade
+(4) O Rio São Francisco
+(5) A Ferrovia
+(6) O Museu
+
+(4.3) NÃO
+Ok! Vamos encerrar por aqui.
+Sempre que precisar, é só me chamar novamente.
+
+(0) Volta pro Standby 
+
+
+
+
+
+
+(5) A Ferrovia
+(O vídeo começa automaticamente ao clicar)
+X
+Para mais informações visite a sala 8 e 9
+
+(5.0) Tela acessa escrito ‘’ENCERRAR’’, vai direto pro final (2.1)
+
+(5.1) (Fim do vídeo)
+Quer saber mais sobre os outros temas?
+
+(5.2) SIM
+Selecione no tablet abaixo o tema que deseja explorar.
+(2) O Cangaço
+(3) A Cidade
+(4) O Rio São Francisco
+(5) A Ferrovia
+(6) O Museu
+
+(5.3) NÃO
+Ok! Vamos encerrar por aqui.
+Sempre que precisar, é só me chamar novamente.
+
+(0) Volta pro Standby 
+
+
+
+(6) O Museu
+(O vídeo começa automaticamente ao clicar)
+X
+Para mais informações visite a sala 8 e 9
+
+(6.0) Tela acessa escrito ‘’ENCERRAR’’, vai direto pro final (2.1)
+
+(6.1) (Fim do vídeo)
+Quer saber mais sobre os outros temas?
+
+(6.2) SIM
+Selecione no tablet abaixo o tema que deseja explorar.
+(2) O Cangaço
+(3) A Cidade
+(4) O Rio São Francisco
+(5) A Ferrovia
+(6) O Museu
+
+(6.3) NÃO
+Ok! Vamos encerrar por aqui.
+Sempre que precisar, é só me chamar novamente.
+
+(0) Volta pro Standby 

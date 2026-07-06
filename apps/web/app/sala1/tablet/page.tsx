@@ -2,53 +2,70 @@
 
 import { useEffect, useState } from "react";
 import { getSocket } from "@/lib/socket/client";
-import { temas, type TemaId } from "@/lib/temas";
-
-type Estado = "selecionando" | "aguardando-video";
+import { HotspotImage } from "@/components/HotspotImage";
+import { assets, buscarTema, type TemaId } from "@/lib/sala1/temas";
+import { hotspotsStandby, hotspotsMenu, hotspotsTema, hotspotsFimVideo, hotspotsEncerrando } from "@/lib/sala1/hotspots";
+import type { Estado } from "@/lib/sala1/estado";
 
 export default function Sala1TabletPage() {
-  const [estado, setEstado] = useState<Estado>("selecionando");
+  const [estado, setEstado] = useState<Estado>({ tipo: "standby" });
 
   useEffect(() => {
     const socket = getSocket();
     socket.emit("sala1:entrar", { papel: "tablet" });
-
-    socket.on("sala1:voltar-loop", () => setEstado("selecionando"));
-
+    socket.on("sala1:estado", setEstado);
     return () => {
-      socket.off("sala1:voltar-loop");
+      socket.off("sala1:estado", setEstado);
     };
   }, []);
 
-  function selecionarTema(temaId: TemaId) {
-    setEstado("aguardando-video");
-    getSocket().emit("sala1:selecionar-tema", { temaId });
+  switch (estado.tipo) {
+    case "standby":
+      return (
+        <HotspotImage
+          src={assets.standby.imagem}
+          alt="Tela inicial"
+          hotspots={hotspotsStandby}
+          onHotspot={() => getSocket().emit("sala1:iniciar")}
+        />
+      );
+
+    case "menu":
+      return (
+        <HotspotImage
+          src={assets.menu.imagem}
+          alt="Escolha o tema"
+          hotspots={hotspotsMenu}
+          onHotspot={(id) => getSocket().emit("sala1:selecionar-tema", { temaId: id as TemaId })}
+        />
+      );
+
+    case "tema":
+      return (
+        <HotspotImage
+          src={buscarTema(estado.temaId).imagem}
+          alt={buscarTema(estado.temaId).titulo}
+          hotspots={hotspotsTema}
+          onHotspot={() => getSocket().emit("sala1:sair")}
+        />
+      );
+
+    case "fim-video":
+      return (
+        <HotspotImage
+          src={assets.fimVideo.imagem}
+          alt="Quer escolher outro tema?"
+          hotspots={hotspotsFimVideo}
+          onHotspot={(id) => {
+            if (id === "sim") getSocket().emit("sala1:outro-sim");
+            if (id === "nao") getSocket().emit("sala1:outro-nao");
+          }}
+        />
+      );
+
+    case "encerrando":
+      return (
+        <HotspotImage src={assets.encerrando.imagem} alt="Encerrando" hotspots={hotspotsEncerrando} onHotspot={() => {}} />
+      );
   }
-
-  return (
-    <main className="flex min-h-screen flex-col items-center justify-center gap-12 bg-neutral-950 p-10 text-center text-white">
-      <div>
-        <h1 className="text-4xl font-bold">Bem-vindo ao Museu do Sertão de Piranhas</h1>
-        <p className="mt-4 text-2xl text-neutral-300">
-          {estado === "selecionando"
-            ? "Selecione o tema que deseja se aprofundar"
-            : "Assista à projeção na tela ao lado"}
-        </p>
-      </div>
-
-      {estado === "selecionando" && (
-        <div className="grid w-full max-w-3xl grid-cols-2 gap-6">
-          {temas.map((tema) => (
-            <button
-              key={tema.id}
-              onClick={() => selecionarTema(tema.id)}
-              className="rounded-2xl bg-neutral-800 px-8 py-12 text-3xl font-semibold transition active:scale-95 active:bg-neutral-700"
-            >
-              {tema.titulo}
-            </button>
-          ))}
-        </div>
-      )}
-    </main>
-  );
 }
