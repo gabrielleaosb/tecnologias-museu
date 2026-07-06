@@ -25,13 +25,12 @@ Tablet exibe tela em loop de boas-vindas. Visitante seleciona um tema. Um vídeo
 - Rio São Francisco
 - A Ferrovia
 
-**Integração física:**  
-- Projeção mapeada: **MadMapper** (software externo, fora do escopo de desenvolvimento)
-- Trigger: o app faz uma chamada HTTP para a API local do MadMapper (`http://localhost:8080`) ao selecionar um tema
-- Iluminação da maquete: fora do escopo
+**Dispositivos:** 2 telas físicas sincronizadas — um **tablet** (interação do visitante) e uma **TV** (onde o vídeo do tema realmente toca). A Sala 1 **não** integra com o MadMapper — essa integração é de outra sala (a definir).
 
 **Fluxo:**  
-`Loop boas-vindas → Seleção de tema → Vídeo toca → Fim do vídeo → Volta ao loop`
+`Tablet: loop de boas-vindas → visitante seleciona tema` → `TV: troca do loop para o vídeo do tema → ao terminar, volta ao loop` → `Tablet: volta à tela de seleção`
+
+Sincronização tablet ↔ TV em tempo real via WebSocket (Socket.IO), mediada pelo servidor.
 
 ---
 
@@ -75,54 +74,42 @@ Totem com chatbot guiado por menus sobre o tema Cangaço. Não é IA generativa 
 
 ## Arquitetura Técnica
 
-### Stack
+### Stack (atualizada — ver decisão de hospedagem abaixo)
 
 | Camada | Tecnologia |
 |---|---|
-| Frontend + API | Next.js 14 (App Router) |
-| Banco de dados | SQLite (`better-sqlite3`) |
-| Armazenamento de mídia | Disco local (`/public/uploads`) |
-| Gerenciador de processo | PM2 (reinício automático) |
+| Frontend + API | Next.js 16 (App Router) |
+| Tempo real (sync entre telas) | Socket.IO (custom server Node) |
+| Banco de dados | PostgreSQL (container Docker) + Drizzle ORM |
+| Armazenamento de mídia | Volume Docker (`/public/videos`, uploads da Escada) |
+| Empacotamento/deploy | Docker + Docker Compose (`web`, `db`, `caddy`) |
+| Reverse proxy / TLS | Caddy |
 | Browser nos dispositivos | Chromium em modo kiosk (`--kiosk --noerrors`) |
 
 ### Rotas do app
 
 ```
-/sala1    → Kiosk de seleção de vídeos + trigger MadMapper
-/escada   → Cabine lambe-lambe (foto/vídeo)
-/sala7    → Galeria de depoimentos em loop (TV)
-/sala8    → Assistente virtual do Cangaço
+/sala1/tablet → Tela de seleção de tema (interação do visitante)
+/sala1/tv     → Tela de exibição (loop + vídeo do tema), sincronizada via WebSocket
+/escada       → Cabine lambe-lambe (foto/vídeo)
+/sala7        → Galeria de depoimentos em loop (TV)
+/sala8        → Assistente virtual do Cangaço
 ```
 
-### Infraestrutura
+### Infraestrutura (DECISÃO ATUALIZADA)
 
-- **Tudo roda localmente** nos PCs do museu — sem dependência de internet para funcionamento
-- **AnyDesk** instalado em cada PC para manutenção remota por Gabriel
-- Cada dispositivo (totem, tablet, TV) tem um **PC dedicado**
-- Os PCs precisam estar na **mesma rede interna** do museu para a sincronização Escada → Sala 7
+- **Hospedagem em VPS**, não mais 100% local — confirmado que o museu terá internet estável
+- App rodando via **Docker Compose** na VPS; a mesma imagem pode subir localmente se necessário (portabilidade mantida)
+- **AnyDesk** mantido nos PCs físicos para manutenção/suporte
+- Cada dispositivo (tablet, TV, totem) é um cliente (browser em modo kiosk) que se conecta à VPS
+- Sincronização entre telas da mesma sala (Sala 1: tablet↔TV; Escada→Sala7) passa a ser feita **pelo servidor central na VPS** via WebSocket, não mais por rede local do museu
+- MadMapper (outra sala, fora do escopo da Sala 1) segue como integração local — arquitetura de trigger a definir quando a sala responsável for detalhada
 
 ---
 
-## Dependência Crítica: Escada → Sala 7
+## Dependência Crítica: Escada → Sala 7 (RESOLVIDA)
 
-Esta é a única comunicação entre dispositivos distintos no projeto. Três opções foram levantadas:
-
-### Opção A — Um PC faz papel de servidor (recomendada se rede interna confirmada)
-O PC da Sala 7 roda o servidor Next.js. O PC da Escada envia fotos/vídeos para o IP local da Sala 7. Todos na mesma rede Wi-Fi do museu.
-- Sem internet, sem custo adicional
-- Se o PC da Sala 7 desligar, Escada também para
-
-### Opção B — Backend em nuvem só para sincronização (recomendada se rede interna incerta)
-Supabase (plano gratuito) armazena fotos/vídeos. Escada envia, Sala 7 busca em tempo real.
-- PCs completamente independentes entre si
-- Requer internet funcionando no museu apenas para essa feature
-
-### Opção C — Pasta compartilhada em rede
-Escada salva numa pasta de rede Windows. Sala 7 monitora a pasta.
-- Solução mais simples de implementar
-- Configuração de rede Windows pode ser frágil em produção
-
-**⚠️ DECISÃO PENDENTE:** Aguardando reunião com o museu para confirmar se todos os PCs estarão na mesma rede Wi-Fi interna. Essa resposta define qual opção seguir.
+Com a decisão de hospedar em VPS (internet estável confirmada no museu), esta dependência segue o mesmo modelo da sincronização Sala 1 (tablet↔TV): a Escada envia a foto/vídeo pro servidor central (VPS), que grava no Postgres/volume e notifica a Sala 7 em tempo real via WebSocket. PCs ficam independentes entre si, dependendo apenas da internet do museu — equivalente à antiga "Opção B", mas usando a mesma infra Docker do resto do projeto em vez de um serviço terceiro (Supabase).
 
 ---
 
@@ -130,13 +117,14 @@ Escada salva numa pasta de rede Windows. Sala 7 monitora a pasta.
 
 | # | Dúvida | Impacto |
 |---|---|---|
-| 1 | Os PCs de todos os dispositivos estarão na mesma rede Wi-Fi interna do museu? | Define arquitetura de sincronização Escada → Sala 7 |
-| 2 | Qual PC será usado em cada sala? (specs, OS) | Garante compatibilidade do app |
-| 3 | Quando Gabriel terá acesso ao tablet para testes físicos? | Testes de webcam, touch, modo kiosk |
-| 4 | Conteúdo dos vídeos da Sala 1 — quem fornece e em qual formato? | Precisa estar pronto antes da Sala 1 estar completa |
-| 5 | Conteúdo do assistente virtual da Sala 8 — os textos completos de cada tema? | Precisa estar pronto antes da Sala 8 estar completa |
-| 6 | Data exata da inauguração? | Define deadline real |
-| 7 | Haverá alguém do museu treinado para operação básica (religar cabo, reiniciar tablet)? | Define o nível do documento de operação a entregar |
+| 1 | Qual PC será usado em cada sala? (specs, OS) | Garante compatibilidade do app |
+| 2 | Quando Gabriel terá acesso ao tablet para testes físicos? | Testes de webcam, touch, modo kiosk |
+| 3 | Conteúdo dos vídeos da Sala 1 — quem fornece e em qual formato? | Precisa estar pronto antes da Sala 1 estar completa (recebido só o template/estrutura até agora) |
+| 4 | Conteúdo do assistente virtual da Sala 8 — os textos completos de cada tema? | Precisa estar pronto antes da Sala 8 estar completa |
+| 5 | Data exata da inauguração? | Define deadline real |
+| 6 | Haverá alguém do museu treinado para operação básica (religar cabo, reiniciar tablet)? | Define o nível do documento de operação a entregar |
+| 7 | Qual VPS/provedor será usado e quem paga por ela? | Define custo recorrente de infra (fora do orçamento original) |
+| 8 | Qual sala/dispositivo é responsável pelo trigger do MadMapper? | Sala 1 foi descartada dessa integração; precisa mapear qual sala assume |
 
 ---
 
@@ -185,7 +173,7 @@ SUPORTE PÓS-INAUGURAÇÃO (opcional — propor ao cliente)
 
 ## Notas Técnicas
 
-- **MadMapper API:** porta 8080, trigger via HTTP GET. Ex: `GET http://localhost:8080/action?name=cangaco`
-- **PM2:** gerencia o processo Node.js, reinicia automaticamente em crash, sobe junto com o PC no boot
-- **AnyDesk:** instalado em cada PC para acesso remoto de Gabriel em caso de problema
-- **LGPD:** fotos e vídeos dos visitantes ficam armazenados localmente, sem envio para nuvem (exceto se Opção B for escolhida para sincronização — avaliar política de privacidade nesse caso)
+- **MadMapper API:** porta 8080, trigger via HTTP GET, ex. `GET http://localhost:8080/action?name=cangaco`. Não é usada pela Sala 1 — pertence a outra sala, a mapear.
+- **Docker Compose:** 3 serviços — `web` (Next.js + Socket.IO), `db` (Postgres), `caddy` (reverse proxy/TLS). Mesma stack sobe em VPS ou localmente.
+- **AnyDesk:** instalado em cada PC para acesso remoto de Gabriel em caso de problema físico no dispositivo
+- **LGPD:** com a mudança para VPS, fotos e vídeos dos visitantes (Escada) passam a trafegar e ficar armazenados no servidor central — revisar política de privacidade/termo de uso de imagem considerando esse armazenamento remoto (antes seria só local)
