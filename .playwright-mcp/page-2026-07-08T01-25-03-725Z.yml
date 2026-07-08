@@ -1,0 +1,29 @@
+- generic [active] [ref=f10e1]:
+  - alert [ref=f10e23]
+  - generic [ref=f10e24]:
+    - button "Anterior" [ref=f10e25] [cursor=pointer]:
+      - img "Anterior" [ref=f10e26]
+    - generic [ref=f10e27]:
+      - generic [ref=f10e28]:
+        - button "Voltar" [ref=f10e29] [cursor=pointer]:
+          - img "Voltar" [ref=f10e30]
+        - img "Museu do Sertão - Piranhas, AL" [ref=f10e31]
+      - generic [ref=f10e32]:
+        - img "Pedro Silva" [ref=f10e34]
+        - generic [ref=f10e35]:
+          - generic [ref=f10e36]:
+            - paragraph [ref=f10e37]: "DEIXOU ESTA MENSAGEM:"
+            - paragraph [ref=f10e38]: (sem mensagem)
+          - generic [ref=f10e40]:
+            - paragraph [ref=f10e41]: VEIO DE
+            - paragraph [ref=f10e42]: ALAGOAS
+            - paragraph [ref=f10e43]: BRASIL
+          - generic [ref=f10e44]:
+            - generic [ref=f10e45]:
+              - paragraph [ref=f10e46]: Pedro Silva
+              - paragraph [ref=f10e47]: 07 de julho de 2026
+            - button "2 Prestigiar" [disabled] [ref=f10e48] [cursor=pointer]:
+              - generic [ref=f10e49]: "2"
+              - generic [ref=f10e50]: Prestigiar
+    - button "Próximo" [ref=f10e51] [cursor=pointer]:
+      - img "Próximo" [ref=f10e52]

@@ -1,0 +1,19 @@
+- generic [active] [ref=f6e1]:
+  - generic [ref=f6e2]:
+    - generic [ref=f6e3]:
+      - heading "DEPOIMENTOS" [level=1] [ref=f6e4]
+      - generic [ref=f6e5]:
+        - link "Criar Relatório" [ref=f6e6] [cursor=pointer]:
+          - /url: /api/admin/relatorio
+        - button "Logout" [ref=f6e7] [cursor=pointer]
+    - generic [ref=f6e9]:
+      - generic [ref=f6e10]:
+        - img "Pedro Silva" [ref=f6e12]
+        - generic [ref=f6e13]: PEDRO SILVA
+      - generic [ref=f6e14]:
+        - paragraph [ref=f6e15]: "DEIXOU ESTA MENSAGEM:"
+        - paragraph [ref=f6e16]: (sem mensagem)
+      - generic [ref=f6e17]:
+        - button "Deletar mensagem" [disabled] [ref=f6e18] [cursor=pointer]
+        - button "Deletar tudo" [ref=f6e19] [cursor=pointer]
+  - alert [ref=f6e20]

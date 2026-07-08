@@ -1,0 +1,7 @@
+- generic [active] [ref=f1e1]:
+  - generic [ref=f1e3]:
+    - heading "Painel de Depoimentos" [level=1] [ref=f1e4]
+    - textbox "Usuário" [ref=f1e5]
+    - textbox "Senha" [ref=f1e6]
+    - button "Entrar" [ref=f1e7] [cursor=pointer]
+  - alert [ref=f1e8]

@@ -1,0 +1,26 @@
+- generic [active] [ref=f7e1]:
+  - generic [ref=f7e2]:
+    - generic [ref=f7e3]:
+      - generic [ref=f7e4]:
+        - paragraph [ref=f7e5]: Quer aparecer nesta galeria?
+        - paragraph [ref=f7e6]: Vá até a cabine de gravação, localizada na escada do térreo, e registre sua visita com uma foto ou um vídeo.
+      - generic [ref=f7e7]:
+        - heading "GALERIA DE DEPOIMENTOS" [level=1] [ref=f7e8]
+        - paragraph [ref=f7e9]:
+          - text: O Museu do Sertão já recebeu
+          - strong [ref=f7e10]: "0"
+          - text: visitantes de
+          - strong [ref=f7e11]: "0"
+          - text: estados e
+          - strong [ref=f7e12]: "0"
+          - text: países.
+      - img "Museu do Sertão - Piranhas, AL" [ref=f7e13]
+    - generic [ref=f7e14]:
+      - paragraph [ref=f7e16]: Nenhum depoimento ainda.
+      - generic [ref=f7e17]:
+        - heading "FILTRAR" [level=2] [ref=f7e18]
+        - button "Fotos" [ref=f7e19] [cursor=pointer]
+        - button "Vídeos" [ref=f7e20] [cursor=pointer]
+        - button "Mais recentes" [ref=f7e21] [cursor=pointer]
+        - button "Mais prestigiados" [ref=f7e22] [cursor=pointer]
+  - alert [ref=f7e23]

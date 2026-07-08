@@ -2,7 +2,8 @@ import { createServer } from "node:http";
 import next from "next";
 import { Server } from "socket.io";
 import { reduzir, type Estado } from "@/lib/sala1/estado";
-import { SALA1_ROOM, type ClientToServerEvents, type ServerToClientEvents } from "@/lib/socket/eventos";
+import { SALA1_ROOM, SALA7_ROOM, type ClientToServerEvents, type ServerToClientEvents } from "@/lib/socket/eventos";
+import { setIO } from "@/lib/socket/server-instance";
 
 const dev = process.env.NODE_ENV !== "production";
 const port = Number(process.env.PORT ?? 3000);
@@ -18,6 +19,7 @@ app.prepare().then(() => {
   const io = new Server<ClientToServerEvents, ServerToClientEvents>(httpServer, {
     path: "/socket.io",
   });
+  setIO(io);
 
   let estado: Estado = { tipo: "standby" };
   let timeoutOcioso: ReturnType<typeof setTimeout> | null = null;
@@ -48,6 +50,10 @@ app.prepare().then(() => {
     socket.on("sala1:outro-sim", () => aplicarAcao({ tipo: "outro-sim" }));
     socket.on("sala1:outro-nao", () => aplicarAcao({ tipo: "outro-nao" }));
     socket.on("sala1:video-finalizado", () => aplicarAcao({ tipo: "video-finalizado" }));
+
+    socket.on("sala7:entrar", () => {
+      socket.join(SALA7_ROOM);
+    });
   });
 
   httpServer.listen(port, () => {

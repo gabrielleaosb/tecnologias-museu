@@ -1,9 +1,25 @@
 import type { Estado } from "@/lib/sala1/estado";
 
 export const SALA1_ROOM = "sala1";
+export const SALA7_ROOM = "sala7";
+
+export interface DepoimentoPublico {
+  id: string;
+  nome: string;
+  pais: string;
+  estado: string;
+  tipo: "foto" | "video";
+  arquivoUrl: string;
+  texto: string | null;
+  prestigios: number;
+  criadoEm: string;
+}
 
 export interface ServerToClientEvents {
   "sala1:estado": (estado: Estado) => void;
+  "sala7:novo-depoimento": (depoimento: DepoimentoPublico) => void;
+  "sala7:depoimento-removido": (payload: { id: string }) => void;
+  "sala7:prestigio-atualizado": (payload: { id: string; prestigios: number }) => void;
 }
 
 export interface ClientToServerEvents {
@@ -14,4 +30,5 @@ export interface ClientToServerEvents {
   "sala1:outro-sim": () => void;
   "sala1:outro-nao": () => void;
   "sala1:video-finalizado": () => void;
+  "sala7:entrar": () => void;
 }
