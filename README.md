@@ -1,4 +1,4 @@
-# Museu do Sertão de Piranhas — Sistemas Interativos
+# Museu — Sistemas Interativos
 
 Repositório do sistema web para os dispositivos interativos do Museu do Sertão de Piranhas, AL. Veja `PROJETO.md` para o contexto completo do projeto (escopo, arquitetura, cronograma).
 
