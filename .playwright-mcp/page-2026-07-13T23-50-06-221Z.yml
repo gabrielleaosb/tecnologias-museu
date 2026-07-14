@@ -1,0 +1,13 @@
+- generic [active] [ref=f1e1]:
+  - alert [ref=f1e10]
+  - generic [ref=f1e27]:
+    - img "Museu do Sertão - Piranhas, AL" [ref=f1e29]
+    - generic [ref=f1e30]:
+      - heading "Você optou por gravar um vídeo, siga as instruções, são apenas algumas etapas." [level=1] [ref=f1e31]: Você optou por gravar um vídeo,siga as instruções, são apenas algumas etapas.
+      - paragraph [ref=f1e32]: Informações básicas (obrigatório)
+      - generic [ref=f1e33]:
+        - textbox "Nome" [ref=f1e34]
+        - textbox "E-mail" [ref=f1e35]
+    - generic [ref=f1e36]:
+      - button "ANTERIOR" [ref=f1e37] [cursor=pointer]
+      - button "PRÓXIMO" [disabled] [ref=f1e39]

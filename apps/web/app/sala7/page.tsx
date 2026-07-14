@@ -79,9 +79,9 @@ export default function Sala7Page() {
   }
 
   return (
-    <div className="min-h-screen w-full p-8 sm:p-12" style={{ backgroundColor: coresSala7.fundo }}>
+    <div className="relative min-h-screen w-full p-8 sm:p-12" style={{ backgroundColor: coresSala7.fundo }}>
       <div className="mb-10 flex items-start justify-between gap-8">
-        <div className="max-w-xs rounded-md p-5" style={{ backgroundColor: coresSala7.detalheCaixa }}>
+        <div className="max-w-xs rounded-md p-5" style={{ backgroundColor: coresSala7.painelFiltro }}>
           <p className="font-bold text-white">Quer aparecer nesta galeria?</p>
           <p className="mt-2 text-sm text-white/90">
             Vá até a cabine de gravação, localizada na escada do térreo, e registre sua visita com uma foto ou um
@@ -102,14 +102,14 @@ export default function Sala7Page() {
         <Logo variante="escura" />
       </div>
 
-      <div className="flex gap-8">
-        <div className="grid flex-1 grid-cols-2 gap-6 sm:grid-cols-4">
-          {lista.map((d) => (
-            <CardDepoimento key={d.id} depoimento={d} onClick={() => setSelecionadoId(d.id)} />
-          ))}
-          {lista.length === 0 && <p style={{ color: coresSala7.texto }}>Nenhum depoimento ainda.</p>}
-        </div>
+      <div className="grid grid-cols-2 gap-6 sm:grid-cols-4">
+        {lista.map((d) => (
+          <CardDepoimento key={d.id} depoimento={d} onClick={() => setSelecionadoId(d.id)} />
+        ))}
+        {lista.length === 0 && <p style={{ color: coresSala7.texto }}>Nenhum depoimento ainda.</p>}
+      </div>
 
+      <div className="absolute right-8 top-32 sm:right-12">
         <PainelFiltro tipo={tipo} ordenacao={ordenacao} onTipoChange={setTipo} onOrdenacaoChange={setOrdenacao} />
       </div>
     </div>

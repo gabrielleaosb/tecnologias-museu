@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { cores } from "@/lib/escada/cores";
+import { Logo } from "@/components/escada/Logo";
 
 const LIMITE_CARACTERES = 150;
 
@@ -13,7 +14,10 @@ interface TelaTextoProps {
 
 export function TelaTexto({ tipo, texto, onTextoChange, onProximo, enviando }: TelaTextoProps) {
   return (
-    <div className="flex h-screen w-screen flex-col justify-center gap-8 p-8 sm:p-12" style={{ backgroundColor: cores.fundoClaro }}>
+    <div className="relative flex h-screen w-screen flex-col justify-center gap-8 p-8 sm:p-12" style={{ backgroundColor: cores.fundoClaro }}>
+      <div className="absolute left-8 top-8 sm:left-12 sm:top-12">
+        <Logo variante="escura" />
+      </div>
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-extrabold sm:text-2xl" style={{ color: cores.textoEscuro }}>
           Para complementar {tipo === "video" ? "o vídeo" : "a foto"},

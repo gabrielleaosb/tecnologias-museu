@@ -1,4 +1,5 @@
 import { cores } from "@/lib/escada/cores";
+import { Logo } from "@/components/escada/Logo";
 import { Navegacao } from "@/components/escada/Navegacao";
 
 interface TelaAutorizacaoProps {
@@ -11,7 +12,10 @@ interface TelaAutorizacaoProps {
 
 export function TelaAutorizacao({ nome, autorizado, onAutorizadoChange, onAnterior, onProximo }: TelaAutorizacaoProps) {
   return (
-    <div className="flex h-screen w-screen flex-col justify-between p-8 sm:p-12" style={{ backgroundColor: cores.fundoClaro }}>
+    <div className="relative flex h-screen w-screen flex-col justify-between p-8 sm:p-12" style={{ backgroundColor: cores.fundoClaro }}>
+      <div className="absolute left-8 top-8 sm:left-12 sm:top-12">
+        <Logo variante="escura" />
+      </div>
       <div className="flex flex-1 flex-col items-center justify-center gap-8 text-center">
         <h1 className="max-w-lg text-xl font-extrabold sm:text-2xl" style={{ color: cores.textoEscuro }}>
           {nome || "Visitante"}, falta pouco, precisamos da sua autorização para que o museu utilize sua imagem.

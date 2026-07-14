@@ -1,8 +1,8 @@
 export const coresAdmin = {
-  fundo: "#3B2A1D",
-  cardMensagem: "#B8860B",
-  botaoDeletar: "#E4483A",
-  botaoAcao: "#F5C16C",
-  botaoSecundario: "#9CA3AF",
+  fundo: "#3C2A1A",
+  cardMensagem: "#C48405",
+  botaoDeletar: "#FF2D2D",
+  botaoAcao: "#FFCE76",
+  botaoSecundario: "#6C757C",
   texto: "#FFFFFF",
 } as const;

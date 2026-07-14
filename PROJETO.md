@@ -64,6 +64,10 @@ Cabine cenográfica embaixo da escada. Tablet + webcam. Visitante registra um de
 
 **Dependência crítica:** este sistema precisa se comunicar com a Sala 7 (ver seção de arquitetura).
 
+**✅ Status de fidelidade visual (2026-07-13):** passada de fidelidade visual feita a partir dos 3 PDFs do protótipo (Adobe XD exportado). Corrigido um bug estrutural que afetava todo o app: a fonte da marca ("Futura PT", já configurada via `@font-face`) nunca era aplicada — o `body` tinha `font-family: Arial` fixo sobrescrevendo tudo. Cores de todas as telas (Escada, Admin, Sala 7) recalibradas a partir de amostragem de pixel nos PDFs renderizados em alta resolução. Corrigida a tela de Escolha (vídeo/foto) que usava fundo claro por engano — no protótipo ela usa o mesmo fundo escuro da tela de boas-vindas. Adicionado o logo (que estava faltando) em 6 das telas do fluxo. Sala 7: nome do visitante agora sobreposto na foto/vídeo (como no protótipo), painel de filtro virou card flutuante. Escada e Sala 7 validados visualmente (navegador vs. PDF) e ficaram muito próximos do protótipo.
+
+**⚠️ Pendente:** Admin (`/admin` e `/admin/login`) ainda não está 100% fiel — a tela de login não tem design de referência no PDF (só a lista de depoimentos foi prototipada) e está com um visual genérico/placeholder; a lista de depoimentos por dentro também precisa de mais uma passada de ajuste fino. Precisa de revisão específica do que está diferente antes da próxima rodada.
+
 ---
 
 ### 3. Sala 8 — Assistente Virtual Interativo (Cangaço)

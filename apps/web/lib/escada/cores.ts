@@ -1,10 +1,11 @@
 export const cores = {
-  fundoEscuro: "#55707B",
-  fundoClaro: "#FCE8DC",
-  textoEscuro: "#3E2A1E",
+  fundoEscuro: "#546975",
+  caixaEscura: "#46565F",
+  fundoClaro: "#FFEBE0",
+  textoEscuro: "#3D2A1A",
   textoClaro: "#FFFFFF",
-  laranja: "#F5A623",
-  botaoTan: "#DCA173",
+  laranja: "#FFB50A",
+  botaoTan: "#E1B191",
   vermelho: "#E85C4A",
-  overlayEscuro: "rgba(59, 42, 29, 0.92)",
+  overlayEscuro: "rgba(61, 42, 26, 0.92)",
 } as const;

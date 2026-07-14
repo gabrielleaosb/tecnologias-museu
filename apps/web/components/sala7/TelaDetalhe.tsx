@@ -19,14 +19,22 @@ function formatarData(iso: string): string {
 export function TelaDetalhe({ depoimento, jaPrestigiou, onVoltar, onAnterior, onProximo, onPrestigiar }: TelaDetalheProps) {
   return (
     <div className="relative flex h-screen w-screen items-center justify-center gap-4 p-8" style={{ backgroundColor: coresSala7.fundo }}>
-      <button onClick={onAnterior} className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-black/10 cursor-pointer">
-        <Image src="/icons/escada/seta1.png" alt="Anterior" width={20} height={20} className="h-5 w-5" />
+      <button
+        onClick={onAnterior}
+        className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full cursor-pointer"
+        style={{ backgroundColor: coresSala7.circuloNav }}
+      >
+        <Image src="/icons/escada/seta1.png" alt="Anterior" width={20} height={20} className="h-5 w-5 invert" />
       </button>
 
       <div className="flex w-full max-w-4xl flex-col gap-6">
         <div className="flex items-center justify-between">
-          <button onClick={onVoltar} className="flex h-12 w-12 items-center justify-center rounded-full bg-black/10 cursor-pointer">
-            <Image src="/icons/escada/voltar1.png" alt="Voltar" width={20} height={20} className="h-5 w-5" />
+          <button
+            onClick={onVoltar}
+            className="flex h-12 w-12 items-center justify-center rounded-full cursor-pointer"
+            style={{ backgroundColor: coresSala7.circuloNav }}
+          >
+            <Image src="/icons/escada/voltar1.png" alt="Voltar" width={20} height={20} className="h-5 w-5 invert" />
           </button>
           <Logo variante="escura" />
           <span className="w-12" />
@@ -92,8 +100,12 @@ export function TelaDetalhe({ depoimento, jaPrestigiou, onVoltar, onAnterior, on
         </div>
       </div>
 
-      <button onClick={onProximo} className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-black/10 cursor-pointer">
-        <Image src="/icons/escada/seta2.png" alt="Próximo" width={20} height={20} className="h-5 w-5" />
+      <button
+        onClick={onProximo}
+        className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full cursor-pointer"
+        style={{ backgroundColor: coresSala7.circuloNav }}
+      >
+        <Image src="/icons/escada/seta2.png" alt="Próximo" width={20} height={20} className="h-5 w-5 invert" />
       </button>
     </div>
   );

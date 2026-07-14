@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import Image from "next/image";
 import { cores } from "@/lib/escada/cores";
+import { Logo } from "@/components/escada/Logo";
 import { useCamera } from "@/lib/escada/useCamera";
 
 interface TelaCapturaProps {
@@ -25,6 +26,7 @@ export function TelaCaptura({ tipo, onCapturado, onAnterior }: TelaCapturaProps)
 
   return (
     <div className="flex h-screen w-screen flex-col gap-8 p-8 sm:p-12" style={{ backgroundColor: cores.fundoClaro }}>
+      <Logo variante="escura" />
       <div className="grid flex-1 grid-cols-1 items-center gap-10 sm:grid-cols-2">
         <div className="relative aspect-video w-full overflow-hidden rounded-md bg-black">
           <video ref={camera.videoRef} autoPlay muted playsInline className="h-full w-full object-cover" />

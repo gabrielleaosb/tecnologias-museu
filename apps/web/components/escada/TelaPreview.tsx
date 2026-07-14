@@ -1,6 +1,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import { cores } from "@/lib/escada/cores";
+import { Logo } from "@/components/escada/Logo";
 
 interface TelaPreviewProps {
   tipo: "video" | "foto";
@@ -23,6 +24,9 @@ export function TelaPreview({ tipo, midiaUrl, onConfirmar, onRegravar, onCancela
           ) : (
             <img src={midiaUrl} alt="Foto capturada" className="w-full" />
           )}
+          <div className="absolute left-4 top-4">
+            <Logo variante="clara" />
+          </div>
         </div>
         <button onClick={() => setTelaCheia(false)} className="flex items-center gap-2 cursor-pointer">
           <Image src="/icons/escada/voltar1.png" alt="" width={20} height={20} className="h-5 w-5" />
@@ -36,6 +40,9 @@ export function TelaPreview({ tipo, midiaUrl, onConfirmar, onRegravar, onCancela
 
   return (
     <div className="relative flex h-screen w-screen items-center justify-center gap-12 p-8 sm:p-12" style={{ backgroundColor: cores.fundoClaro }}>
+      <div className="absolute left-8 top-8 sm:left-12 sm:top-12">
+        <Logo variante="escura" />
+      </div>
       <div className="grid w-full max-w-5xl grid-cols-1 items-center gap-10 sm:grid-cols-2">
         <button onClick={() => setTelaCheia(true)} className="relative aspect-video w-full overflow-hidden rounded-md bg-black cursor-pointer">
           {tipo === "video" ? (

@@ -1,0 +1,12 @@
+- generic [active] [ref=e1]:
+  - alert [ref=e10]
+  - generic [ref=e27]:
+    - generic [ref=e28]:
+      - heading "Você optou por gravar um vídeo, siga as instruções, são apenas algumas etapas." [level=1] [ref=e29]: Você optou por gravar um vídeo,siga as instruções, são apenas algumas etapas.
+      - paragraph [ref=e30]: Informações básicas (obrigatório)
+      - generic [ref=e31]:
+        - textbox "Nome" [ref=e32]
+        - textbox "E-mail" [ref=e33]
+    - generic [ref=e34]:
+      - button "ANTERIOR" [ref=e35] [cursor=pointer]
+      - button "PRÓXIMO" [disabled] [ref=e37]

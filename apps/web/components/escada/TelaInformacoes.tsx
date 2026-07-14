@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { cores } from "@/lib/escada/cores";
+import { Logo } from "@/components/escada/Logo";
 import { Navegacao } from "@/components/escada/Navegacao";
 
 interface TelaInformacoesProps {
@@ -16,7 +17,10 @@ export function TelaInformacoes({ tipo, nome, email, onNomeChange, onEmailChange
   const habilitado = nome.trim().length > 0 && email.trim().length > 0;
 
   return (
-    <div className="flex h-screen w-screen flex-col justify-between p-8 sm:p-12" style={{ backgroundColor: cores.fundoClaro }}>
+    <div className="relative flex h-screen w-screen flex-col justify-between p-8 sm:p-12" style={{ backgroundColor: cores.fundoClaro }}>
+      <div className="absolute left-8 top-8 sm:left-12 sm:top-12">
+        <Logo variante="escura" />
+      </div>
       <div className="flex flex-1 flex-col items-center justify-center gap-6 text-center">
         <Image
           src={tipo === "video" ? "/icons/escada/play.png" : "/icons/escada/foto.png"}

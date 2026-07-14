@@ -1,8 +1,9 @@
 export const coresSala7 = {
-  fundo: "#FCE8DC",
-  texto: "#3E2A1E",
+  fundo: "#FFEBE0",
+  texto: "#3D2A1A",
   cardTexto: "#5A3D28",
-  painelFiltro: "#D9A28C",
-  painelFiltroItem: "#E8BBA4",
-  detalheCaixa: "#3E2A1E",
+  painelFiltro: "#885C3A",
+  painelFiltroItem: "#DFA285",
+  detalheCaixa: "#5D280D",
+  circuloNav: "#3D2A1A",
 } as const;
