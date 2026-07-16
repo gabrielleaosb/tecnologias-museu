@@ -10,6 +10,7 @@ import { TelaCaptura } from "@/components/escada/TelaCaptura";
 import { TelaPreview } from "@/components/escada/TelaPreview";
 import { TelaTexto } from "@/components/escada/TelaTexto";
 import { TelaAgradecimento } from "@/components/escada/TelaAgradecimento";
+import { TecladoVirtual } from "@/components/escada/TecladoVirtual";
 
 type Passo =
   | "boas-vindas"
@@ -21,6 +22,8 @@ type Passo =
   | "preview"
   | "texto"
   | "agradecimento";
+
+const TIMEOUT_INATIVIDADE_MS = 90_000;
 
 const ESTADO_INICIAL = {
   tipo: null as "video" | "foto" | null,
@@ -52,6 +55,26 @@ export default function EscadaPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [passo]);
 
+  useEffect(() => {
+    if (passo === "boas-vindas" || passo === "agradecimento") return;
+
+    let timeoutId: ReturnType<typeof setTimeout>;
+    function resetarTimeout() {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(reiniciar, TIMEOUT_INATIVIDADE_MS);
+    }
+
+    resetarTimeout();
+    window.addEventListener("pointerdown", resetarTimeout);
+    window.addEventListener("keydown", resetarTimeout);
+    return () => {
+      clearTimeout(timeoutId);
+      window.removeEventListener("pointerdown", resetarTimeout);
+      window.removeEventListener("keydown", resetarTimeout);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [passo]);
+
   async function confirmarDepoimento() {
     if (!dados.tipo || !dados.midiaBlob) return;
 
@@ -77,113 +100,122 @@ export default function EscadaPage() {
     }
   }
 
-  switch (passo) {
-    case "boas-vindas":
-      return <TelaBoasVindas onDeixarDepoimento={() => setPasso("escolha")} />;
+  return (
+    <>
+      <div id="escada-conteudo">{renderizarPasso()}</div>
+      <TecladoVirtual />
+    </>
+  );
 
-    case "escolha":
-      return (
-        <TelaEscolha
-          onEscolher={(tipo) => {
-            setDados((d) => ({ ...d, tipo }));
-            setPasso("informacoes");
-          }}
-          onSair={reiniciar}
-        />
-      );
+  function renderizarPasso() {
+    switch (passo) {
+      case "boas-vindas":
+        return <TelaBoasVindas onDeixarDepoimento={() => setPasso("escolha")} />;
 
-    case "informacoes":
-      if (!dados.tipo) {
-        setPasso("escolha");
-        return null;
-      }
-      return (
-        <TelaInformacoes
-          tipo={dados.tipo}
-          nome={dados.nome}
-          email={dados.email}
-          onNomeChange={(nome) => setDados((d) => ({ ...d, nome }))}
-          onEmailChange={(email) => setDados((d) => ({ ...d, email }))}
-          onAnterior={() => setPasso("escolha")}
-          onProximo={() => setPasso("origem")}
-        />
-      );
+      case "escolha":
+        return (
+          <TelaEscolha
+            onEscolher={(tipo) => {
+              setDados((d) => ({ ...d, tipo }));
+              setPasso("informacoes");
+            }}
+            onSair={reiniciar}
+          />
+        );
 
-    case "origem":
-      return (
-        <TelaOrigem
-          nome={dados.nome}
-          pais={dados.pais}
-          estado={dados.estado}
-          onPaisChange={(pais) => setDados((d) => ({ ...d, pais }))}
-          onEstadoChange={(estado) => setDados((d) => ({ ...d, estado }))}
-          onAnterior={() => setPasso("informacoes")}
-          onProximo={() => setPasso("autorizacao")}
-        />
-      );
+      case "informacoes":
+        if (!dados.tipo) {
+          setPasso("escolha");
+          return null;
+        }
+        return (
+          <TelaInformacoes
+            tipo={dados.tipo}
+            nome={dados.nome}
+            email={dados.email}
+            onNomeChange={(nome) => setDados((d) => ({ ...d, nome }))}
+            onEmailChange={(email) => setDados((d) => ({ ...d, email }))}
+            onAnterior={() => setPasso("escolha")}
+            onProximo={() => setPasso("origem")}
+          />
+        );
 
-    case "autorizacao":
-      return (
-        <TelaAutorizacao
-          nome={dados.nome}
-          autorizado={dados.autorizacaoImagem}
-          onAutorizadoChange={(autorizacaoImagem) => setDados((d) => ({ ...d, autorizacaoImagem }))}
-          onAnterior={() => setPasso("origem")}
-          onProximo={() => setPasso("captura")}
-        />
-      );
+      case "origem":
+        return (
+          <TelaOrigem
+            nome={dados.nome}
+            pais={dados.pais}
+            estado={dados.estado}
+            onPaisChange={(pais) => setDados((d) => ({ ...d, pais }))}
+            onEstadoChange={(estado) => setDados((d) => ({ ...d, estado }))}
+            onAnterior={() => setPasso("informacoes")}
+            onProximo={() => setPasso("autorizacao")}
+          />
+        );
 
-    case "captura":
-      if (!dados.tipo) {
-        setPasso("escolha");
-        return null;
-      }
-      return (
-        <TelaCaptura
-          tipo={dados.tipo}
-          onCapturado={(midiaBlob, midiaUrl) => {
-            setDados((d) => ({ ...d, midiaBlob, midiaUrl }));
-            setPasso("preview");
-          }}
-          onAnterior={() => setPasso("autorizacao")}
-        />
-      );
+      case "autorizacao":
+        return (
+          <TelaAutorizacao
+            nome={dados.nome}
+            autorizado={dados.autorizacaoImagem}
+            onAutorizadoChange={(autorizacaoImagem) => setDados((d) => ({ ...d, autorizacaoImagem }))}
+            onAnterior={() => setPasso("origem")}
+            onProximo={() => setPasso("captura")}
+          />
+        );
 
-    case "preview":
-      if (!dados.tipo || !dados.midiaUrl) {
-        setPasso("captura");
-        return null;
-      }
-      return (
-        <TelaPreview
-          tipo={dados.tipo}
-          midiaUrl={dados.midiaUrl}
-          onConfirmar={() => setPasso("texto")}
-          onRegravar={() => {
-            if (dados.midiaUrl) URL.revokeObjectURL(dados.midiaUrl);
-            setDados((d) => ({ ...d, midiaBlob: null, midiaUrl: null }));
-            setPasso("captura");
-          }}
-          onCancelar={reiniciar}
-        />
-      );
+      case "captura":
+        if (!dados.tipo) {
+          setPasso("escolha");
+          return null;
+        }
+        return (
+          <TelaCaptura
+            tipo={dados.tipo}
+            onCapturado={(midiaBlob, midiaUrl) => {
+              setDados((d) => ({ ...d, midiaBlob, midiaUrl }));
+              setPasso("preview");
+            }}
+            onAnterior={() => setPasso("autorizacao")}
+          />
+        );
 
-    case "texto":
-      if (!dados.tipo) {
-        setPasso("escolha");
-        return null;
-      }
-      return (
-        <TelaTexto
-          tipo={dados.tipo}
-          texto={dados.texto}
-          onTextoChange={(texto) => setDados((d) => ({ ...d, texto }))}
-          onProximo={confirmarDepoimento}
-          enviando={enviando}
-        />
-      );
+      case "preview":
+        if (!dados.tipo || !dados.midiaUrl) {
+          setPasso("captura");
+          return null;
+        }
+        return (
+          <TelaPreview
+            tipo={dados.tipo}
+            midiaUrl={dados.midiaUrl}
+            onConfirmar={() => setPasso("texto")}
+            onRegravar={() => {
+              if (dados.midiaUrl) URL.revokeObjectURL(dados.midiaUrl);
+              setDados((d) => ({ ...d, midiaBlob: null, midiaUrl: null }));
+              setPasso("captura");
+            }}
+            onCancelar={reiniciar}
+          />
+        );
 
-    case "agradecimento":
-      return <TelaAgradecimento />;
+      case "texto":
+        if (!dados.tipo) {
+          setPasso("escolha");
+          return null;
+        }
+        return (
+          <TelaTexto
+            tipo={dados.tipo}
+            texto={dados.texto}
+            onTextoChange={(texto) => setDados((d) => ({ ...d, texto }))}
+            onProximo={confirmarDepoimento}
+            enviando={enviando}
+          />
+        );
+
+      case "agradecimento":
+        return <TelaAgradecimento />;
+    }
   }
 }

@@ -26,6 +26,9 @@ services:
   caddy:
     image: caddy:2-alpine
     restart: unless-stopped
+    environment:
+      # Defina no .env da raiz do repo (ver .env.example) - dominio publico da VPS.
+      DOMAIN: ${DOMAIN}
     ports:
       - "80:80"
       - "443:443"

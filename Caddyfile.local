@@ -1,0 +1,5 @@
+{$DOMAIN:localhost} {
+	tls internal
+
+	reverse_proxy web:3000
+}

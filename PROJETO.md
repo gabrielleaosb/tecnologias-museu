@@ -68,6 +68,12 @@ Cabine cenográfica embaixo da escada. Tablet + webcam. Visitante registra um de
 
 **⚠️ Pendente:** Admin (`/admin` e `/admin/login`) ainda não está 100% fiel — a tela de login não tem design de referência no PDF (só a lista de depoimentos foi prototipada) e está com um visual genérico/placeholder; a lista de depoimentos por dentro também precisa de mais uma passada de ajuste fino. Precisa de revisão específica do que está diferente antes da próxima rodada.
 
+**✅ Adequações pra hardware físico (2026-07-16):** com a definição do hardware real da cabine (webcam USB + monitor touch + mini PC), foram resolvidas 4 lacunas que impediriam o funcionamento em produção:
+1. **HTTPS** — `getUserMedia` (captura de câmera) exige contexto seguro; Caddy agora emite certificado automático via domínio (`DOMAIN` no `.env` da raiz), com `Caddyfile.local` como alternativa self-signed pra testes em rede local sem domínio público. Ver seção "Notas Técnicas" abaixo.
+2. **Teclado virtual em tela** (`components/escada/TecladoVirtual.tsx`) — como o dispositivo é só um monitor touch (sem teclado físico), os campos de nome/e-mail/país/estado/depoimento agora abrem um teclado on-screen embutido no app (funciona independente do SO do mini PC — não depende do teclado virtual nativo do Windows/Linux). `inputMode="none"` nos campos evita que o teclado do SO abra em duplicidade.
+3. **Timeout de inatividade geral** — antes só a tela de agradecimento resetava sozinha (15s). Agora qualquer tela do fluxo (exceto boas-vindas) reseta pra tela inicial após 90s sem toque/tecla, cobrindo o caso de alguém abandonar o preenchimento no meio.
+4. **Guia de operação física** — `OPERACAO-CABINE.md` na raiz do repo documenta o setup do Chromium kiosk (perfil persistente pra permissão de câmera sobreviver a reboots, flags, autostart, checklist de validação em campo).
+
 ---
 
 ### 3. Sala 8 — Assistente Virtual Interativo (Cangaço)
@@ -195,3 +201,4 @@ SUPORTE PÓS-INAUGURAÇÃO (opcional — propor ao cliente)
 - **Chromium kiosk da TV precisa da flag `--autoplay-policy=no-user-gesture-required`** — a TV troca de vídeo sozinha (via WebSocket, sem clique/touch), e navegadores bloqueiam autoplay com som sem essa flag ou uma interação prévia do usuário. Sem ela, o vídeo troca mas não toca.
 - **AnyDesk:** instalado em cada PC para acesso remoto de Gabriel em caso de problema físico no dispositivo
 - **LGPD:** com a mudança para VPS, fotos e vídeos dos visitantes (Escada) passam a trafegar e ficar armazenados no servidor central — revisar política de privacidade/termo de uso de imagem considerando esse armazenamento remoto (antes seria só local)
+- **HTTPS é obrigatório para a webcam da Escada.** `getUserMedia` (captura de câmera no navegador) só funciona em "contexto seguro" — HTTPS ou `localhost`. Em produção na VPS, isso significa que precisa de um domínio público real apontando pro IP da VPS, definido em `.env` (`DOMAIN=...`, ver `.env.example`) — o Caddy emite certificado Let's Encrypt automaticamente para esse domínio (`Caddyfile`). Para testar a Escada numa rede local sem domínio público (ex: mini PC + tablet na mesma rede do museu antes de ter DNS configurado), usar `docker compose -f docker-compose.yml -f docker-compose.local-tls.yml up -d`, que sobe o Caddy com certificado autoassinado (`Caddyfile.local` + `tls internal`) — os dispositivos vão precisar confiar nesse certificado manualmente uma vez (aviso de "conexão não segura" no Chromium, aceitar/prosseguir) já que não é validado por uma CA pública.

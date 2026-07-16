@@ -38,6 +38,7 @@ export function TelaOrigem({ nome, pais, estado, onPaisChange, onEstadoChange, o
             </span>
             <input
               type="text"
+              inputMode="none"
               value={pais}
               onChange={(e) => onPaisChange(e.target.value)}
               placeholder="Brasil"
@@ -51,6 +52,7 @@ export function TelaOrigem({ nome, pais, estado, onPaisChange, onEstadoChange, o
             </span>
             <input
               type="text"
+              inputMode="none"
               value={estado}
               onChange={(e) => onEstadoChange(e.target.value)}
               placeholder="Alagoas"

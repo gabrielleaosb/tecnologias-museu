@@ -43,6 +43,7 @@ export function TelaInformacoes({ tipo, nome, email, onNomeChange, onEmailChange
         <div className="flex w-full max-w-md flex-col gap-3">
           <input
             type="text"
+            inputMode="none"
             value={nome}
             onChange={(e) => onNomeChange(e.target.value)}
             placeholder="Nome"
@@ -51,6 +52,7 @@ export function TelaInformacoes({ tipo, nome, email, onNomeChange, onEmailChange
           />
           <input
             type="email"
+            inputMode="none"
             value={email}
             onChange={(e) => onEmailChange(e.target.value)}
             placeholder="E-mail"

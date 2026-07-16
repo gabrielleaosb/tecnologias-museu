@@ -36,6 +36,7 @@ export function TelaTexto({ tipo, texto, onTextoChange, onProximo, enviando }: T
       <div className="flex flex-col items-end gap-2">
         <textarea
           value={texto}
+          inputMode="none"
           maxLength={LIMITE_CARACTERES}
           onChange={(e) => onTextoChange(e.target.value)}
           placeholder="Escreva aqui, se quiser."
