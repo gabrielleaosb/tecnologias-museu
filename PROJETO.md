@@ -74,6 +74,17 @@ Cabine cenográfica embaixo da escada. Tablet + webcam. Visitante registra um de
 3. **Timeout de inatividade geral** — antes só a tela de agradecimento resetava sozinha (15s). Agora qualquer tela do fluxo (exceto boas-vindas) reseta pra tela inicial após 90s sem toque/tecla, cobrindo o caso de alguém abandonar o preenchimento no meio.
 4. **Guia de operação física** — `OPERACAO-CABINE.md` na raiz do repo documenta o setup do Chromium kiosk (perfil persistente pra permissão de câmera sobreviver a reboots, flags, autostart, checklist de validação em campo).
 
+**✅ Passada de fidelidade pixel-a-pixel: telas de Informações, Origem e Texto (2026-07-16), a partir do CSS exportado do XD:**
+- Fontes e espaçamentos ajustados com valores exatos do XD (ex: título/label a 40px com letter-spacing 4px, placeholders em Futura Medium 37px cor `#3D2A1A` com letter-spacing 3.7px via `placeholder:` do Tailwind).
+- Inputs de texto (Nome, E-mail, País, Estado) com dimensões exatas do XD: `width: 827px` (com `max-width: 100%` pra não estourar em telas menores), `height: 58px`, `background: #E2B291`, `border-radius: 4px`.
+- Frases não quebram mais no meio (`whitespace-nowrap`) — cada uma ocupa uma linha e ficam empilhadas via `<br/>`, replicando o texto corrido do protótipo.
+- Logo trocada para `logo-escura1-vertical.png` (variante `escura1-vertical` em `components/escada/Logo.tsx`), reposicionada (+20px pra baixo, +15px pra direita) e aumentada (~30% + mais 15% = ~50% do tamanho original).
+- Ícone de vídeo/foto (tela de Informações): corrigido de `play.png` (errado) pra `video.png`, aumentado 50%.
+- Botões ANTERIOR/PRÓXIMO passaram a ficar centralizados verticalmente na tela (bordas esquerda/direita, meio da altura), via prop `centralizado` em `components/escada/Navegacao.tsx`, replicando o protótipo — não mudou a tela de Autorização, que segue com os botões no rodapé.
+- Teclado virtual: mudou de "empurrar a tela pra cima" para simplesmente sobrepor a tela (comportamento pedido por Gabriel); telas de input receberam `padding-top` extra pra que os campos fiquem acima da área ocupada pelo teclado quando aberto.
+
+**⚠️ Próxima alteração planejada:** revisar e ajustar a tela "Escolha uma das opções" (`components/escada/TelaEscolha.tsx` — escolha entre Vídeo/Foto, logo depois da tela de boas-vindas) contra o CSS/design exato do XD, seguindo o mesmo padrão de fidelidade pixel-a-pixel aplicado nas telas de Informações/Origem/Texto.
+
 ---
 
 ### 3. Sala 8 — Assistente Virtual Interativo (Cangaço)

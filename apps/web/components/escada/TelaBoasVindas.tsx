@@ -9,12 +9,12 @@ export function TelaBoasVindas({ onDeixarDepoimento }: { onDeixarDepoimento: () 
     >
       <Logo variante="clara" />
 
-      <h1 className="max-w-2xl text-2xl font-extrabold tracking-wide text-white sm:text-3xl">
+      <h1 className="max-w-2xl text-[28.8px] font-extrabold tracking-wide text-white sm:text-[36px]">
         SEJA BEM-VINDO(A) AO <span className="font-black">MUSEU DO SERTÃO</span>, EM PIRANHAS, ALAGOAS.
       </h1>
 
       <div className="max-w-xl rounded-md px-6 py-6" style={{ backgroundColor: cores.caixaEscura }}>
-        <p className="text-lg text-white sm:text-xl">
+        <p className="text-[21.6px] text-white sm:text-[24px]">
           <strong>Grave um vídeo</strong> ou <strong>tire uma foto</strong> e deixe sua mensagem. É simples, rápido e
           sua lembrança passa a fazer parte da história deste museu.
         </p>
@@ -22,7 +22,7 @@ export function TelaBoasVindas({ onDeixarDepoimento }: { onDeixarDepoimento: () 
 
       <button
         onClick={onDeixarDepoimento}
-        className="rounded-full px-12 py-5 text-xl font-extrabold tracking-wide cursor-pointer"
+        className="rounded-full px-12 py-5 text-[24px] font-extrabold tracking-wide cursor-pointer"
         style={{ backgroundColor: cores.laranja, color: cores.textoEscuro }}
       >
         DEIXAR DEPOIMENTO

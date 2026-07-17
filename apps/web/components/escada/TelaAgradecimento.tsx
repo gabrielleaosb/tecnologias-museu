@@ -9,11 +9,11 @@ export function TelaAgradecimento() {
     <div className="flex h-screen w-screen flex-col items-center justify-center gap-8 p-8 text-center" style={{ backgroundColor: cores.fundoClaro }}>
       <Logo variante="escura" />
 
-      <h1 className="text-2xl font-extrabold sm:text-3xl" style={{ color: cores.textoEscuro }}>
+      <h1 className="text-[28.8px] font-extrabold sm:text-[36px]" style={{ color: cores.textoEscuro }}>
         Obrigado(a)!
       </h1>
 
-      <p className="max-w-lg text-lg" style={{ color: cores.textoEscuro }}>
+      <p className="max-w-lg text-[21.6px]" style={{ color: cores.textoEscuro }}>
         Seu depoimento foi inserido no banco de dados e já pode ser visto da Galeria de Depoimentos na{" "}
         <strong>Sala 7 - Personalidades</strong>.
       </p>
@@ -22,7 +22,7 @@ export function TelaAgradecimento() {
         <div className="rounded-md bg-white p-3">
           <QrCode valor={urlMapaSalas} />
         </div>
-        <span className="text-xl font-extrabold tracking-wide" style={{ color: cores.textoEscuro }}>
+        <span className="text-[24px] font-extrabold tracking-wide" style={{ color: cores.textoEscuro }}>
           MAPA DAS SALAS
         </span>
       </div>

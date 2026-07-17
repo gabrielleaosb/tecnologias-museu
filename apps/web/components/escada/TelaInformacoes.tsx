@@ -18,37 +18,47 @@ export function TelaInformacoes({ tipo, nome, email, onNomeChange, onEmailChange
 
   return (
     <div className="relative flex h-screen w-screen flex-col justify-between p-8 sm:p-12" style={{ backgroundColor: cores.fundoClaro }}>
-      <div className="absolute left-8 top-8 sm:left-12 sm:top-12">
-        <Logo variante="escura" />
+      <div className="absolute left-[47px] top-[52px] sm:left-[63px] sm:top-[68px]">
+        <Logo variante="escura1-vertical" />
       </div>
-      <div className="flex flex-1 flex-col items-center justify-center gap-6 text-center">
+      <div className="flex flex-1 flex-col items-center justify-start gap-6 pt-16 text-center sm:pt-20">
         <Image
-          src={tipo === "video" ? "/icons/escada/play.png" : "/icons/escada/foto.png"}
+          src={tipo === "video" ? "/icons/escada/video.png" : "/icons/escada/foto.png"}
           alt=""
-          width={56}
-          height={56}
-          className="h-14 w-14"
+          width={131}
+          height={131}
+          className="h-[130.5px] w-[130.5px]"
         />
 
-        <h1 className="max-w-lg text-xl font-extrabold sm:text-2xl" style={{ color: cores.textoEscuro }}>
-          Você optou por {tipo === "video" ? "gravar um vídeo" : "tirar uma foto"},
+        <h1 style={{ color: cores.textoEscuro, fontSize: 40, letterSpacing: 4 }}>
+          <span className="whitespace-nowrap font-bold">
+            Você optou por {tipo === "video" ? "gravar um vídeo" : "tirar uma foto"},
+          </span>
           <br />
-          <span className="font-normal">siga as instruções, são apenas algumas etapas.</span>
+          <span className="whitespace-nowrap font-medium">siga as instruções, são apenas algumas etapas.</span>
         </h1>
 
-        <p className="text-lg" style={{ color: cores.textoEscuro }}>
+        <p className="font-medium" style={{ color: "#895C3B", fontSize: 40, letterSpacing: 4 }}>
           Informações básicas (obrigatório)
         </p>
 
-        <div className="flex w-full max-w-md flex-col gap-3">
+        <div className="flex w-full max-w-[827px] flex-col items-center gap-3">
           <input
             type="text"
             inputMode="none"
             value={nome}
             onChange={(e) => onNomeChange(e.target.value)}
             placeholder="Nome"
-            className="rounded-md px-5 py-3 text-center text-lg outline-none"
-            style={{ backgroundColor: cores.botaoTan, color: cores.textoEscuro }}
+            className="px-[28.8px] text-center text-[25.92px] outline-none placeholder:font-medium placeholder:text-[37px] placeholder:tracking-[3.7px] placeholder:text-[#3D2A1A]"
+            style={{
+              width: 827,
+              maxWidth: "100%",
+              height: 58,
+              backgroundColor: "#E2B291",
+              borderRadius: 4,
+              opacity: 1,
+              color: cores.textoEscuro,
+            }}
           />
           <input
             type="email"
@@ -56,13 +66,28 @@ export function TelaInformacoes({ tipo, nome, email, onNomeChange, onEmailChange
             value={email}
             onChange={(e) => onEmailChange(e.target.value)}
             placeholder="E-mail"
-            className="rounded-md px-5 py-3 text-center text-lg outline-none"
-            style={{ backgroundColor: cores.botaoTan, color: cores.textoEscuro }}
+            className="px-[28.8px] text-center text-[25.92px] outline-none placeholder:font-medium placeholder:text-[37px] placeholder:tracking-[3.7px] placeholder:text-[#3D2A1A]"
+            style={{
+              width: 827,
+              maxWidth: "100%",
+              height: 58,
+              backgroundColor: "#E2B291",
+              borderRadius: 4,
+              opacity: 1,
+              color: cores.textoEscuro,
+            }}
           />
         </div>
       </div>
 
-      <Navegacao onAnterior={onAnterior} onProximo={onProximo} proximoHabilitado={habilitado} />
+      <Navegacao
+        onAnterior={onAnterior}
+        onProximo={onProximo}
+        proximoHabilitado={habilitado}
+        centralizado
+        tamanhoTexto={25.92}
+        tamanhoIcone={24}
+      />
     </div>
   );
 }

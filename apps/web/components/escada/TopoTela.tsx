@@ -22,7 +22,7 @@ export function TopoTela({ onSair, variante = "escura" }: TopoTelaProps) {
             height={24}
             className={`h-6 w-6 ${variante === "clara" ? "invert" : ""}`}
           />
-          <span className="text-sm font-bold tracking-wide" style={{ color: corTexto }}>
+          <span className="text-[16.8px] font-bold tracking-wide" style={{ color: corTexto }}>
             SAIR
           </span>
         </button>

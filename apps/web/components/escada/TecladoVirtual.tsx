@@ -1,13 +1,23 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { cores } from "@/lib/escada/cores";
 
-const LINHA_1 = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"];
-const LINHA_2 = ["q", "w", "e", "r", "t", "y", "u", "i", "o", "p"];
-const LINHA_3 = ["a", "s", "d", "f", "g", "h", "j", "k", "l", "ç"];
-const LINHA_4 = ["z", "x", "c", "v", "b", "n", "m", "-", "_", "."];
-const ACENTOS = ["á", "â", "ã", "é", "ê", "í", "ó", "ô", "õ", "ú"];
+// Paleta neutra do teclado do sistema (Android/Gboard), independente da marca do museu -
+// referência visual: apps/web/design/escada/Depoimentos (Tablet).pdf
+const COR_FUNDO = "#101014";
+const COR_TECLA = "#2b2b33";
+const COR_TEXTO = "#e7e7ea";
+const COR_TEXTO_FRACO = "#8c8c96";
+
+const LINHA_LETRAS_1 = ["q", "w", "e", "r", "t", "y", "u", "i", "o", "p"];
+const LINHA_LETRAS_2 = ["a", "s", "d", "f", "g", "h", "j", "k", "l", "ç"];
+const LINHA_LETRAS_3 = ["z", "x", "c", "v", "b", "n", "m", ",", "."];
+
+const LINHA_NUMEROS_1 = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"];
+const LINHA_NUMEROS_2 = ["@", "#", "$", "_", "&", "-", "+", "(", ")", "/"];
+const LINHA_NUMEROS_3 = ["*", '"', "'", ":", ";", "!", "?"];
+
+const ACENTOS = ["á", "à", "â", "ã", "é", "ê", "í", "ó", "ô", "õ", "ú"];
 
 function setValorNativo(elemento: HTMLInputElement | HTMLTextAreaElement, valor: string) {
   const prototipo =
@@ -26,9 +36,12 @@ function ehCampoElegivel(elemento: Element | null): elemento is HTMLInputElement
   return false;
 }
 
+type Pagina = "letras" | "numeros";
+
 export function TecladoVirtual() {
   const [campoAtivo, setCampoAtivo] = useState<HTMLInputElement | HTMLTextAreaElement | null>(null);
-  const [maiuscula, setMaiuscula] = useState(false);
+  const [pagina, setPagina] = useState<Pagina>("letras");
+  const [maiuscula, setMaiuscula] = useState(true);
   const [mostrarAcentos, setMostrarAcentos] = useState(false);
   const tecladoRef = useRef<HTMLDivElement>(null);
 
@@ -49,17 +62,6 @@ export function TecladoVirtual() {
       document.removeEventListener("focusout", aoDesfocar);
     };
   }, []);
-
-  useEffect(() => {
-    const conteudo = document.getElementById("escada-conteudo");
-    if (!conteudo) return;
-    conteudo.style.transition = "transform 0.2s ease";
-    if (campoAtivo && tecladoRef.current) {
-      conteudo.style.transform = `translateY(-${tecladoRef.current.offsetHeight}px)`;
-    } else {
-      conteudo.style.transform = "";
-    }
-  }, [campoAtivo, mostrarAcentos]);
 
   if (!campoAtivo) return null;
 
@@ -92,19 +94,38 @@ export function TecladoVirtual() {
     }
   }
 
+  function moverCursor(delta: number) {
+    if (!campoAtivo) return;
+    const posicao = Math.max(0, Math.min(campoAtivo.value.length, (campoAtivo.selectionStart ?? 0) + delta));
+    campoAtivo.focus();
+    campoAtivo.setSelectionRange(posicao, posicao);
+  }
+
   function fechar() {
     campoAtivo?.blur();
     setCampoAtivo(null);
+    setPagina("letras");
+    setMostrarAcentos(false);
   }
 
-  function Tecla({ children, onClick, largura = "flex-1" }: { children: React.ReactNode; onClick: () => void; largura?: string }) {
+  function Tecla({
+    children,
+    onClick,
+    largura = "flex-1",
+    fraca = false,
+  }: {
+    children: React.ReactNode;
+    onClick: () => void;
+    largura?: string;
+    fraca?: boolean;
+  }) {
     return (
       <button
         type="button"
         onMouseDown={(e) => e.preventDefault()}
         onClick={onClick}
-        className={`${largura} rounded-md py-3 text-center text-lg font-bold cursor-pointer select-none`}
-        style={{ backgroundColor: cores.botaoTan, color: cores.textoEscuro }}
+        className={`${largura} rounded-md py-3 text-center text-lg cursor-pointer select-none`}
+        style={{ backgroundColor: COR_TECLA, color: fraca ? COR_TEXTO_FRACO : COR_TEXTO }}
       >
         {children}
       </button>
@@ -112,11 +133,7 @@ export function TecladoVirtual() {
   }
 
   return (
-    <div
-      ref={tecladoRef}
-      className="fixed inset-x-0 bottom-0 z-50 flex flex-col gap-2 p-3 shadow-2xl"
-      style={{ backgroundColor: cores.fundoEscuro }}
-    >
+    <div ref={tecladoRef} className="fixed inset-x-0 bottom-0 z-50 flex flex-col gap-1.5 p-2.5 shadow-2xl" style={{ backgroundColor: COR_FUNDO }}>
       {mostrarAcentos && (
         <div className="flex gap-1.5">
           {ACENTOS.map((c) => (
@@ -126,50 +143,88 @@ export function TecladoVirtual() {
           ))}
         </div>
       )}
+
+      {pagina === "letras" ? (
+        <>
+          <div className="flex gap-1.5">
+            {LINHA_LETRAS_1.map((c) => (
+              <Tecla key={c} onClick={() => digitar(c)}>
+                {maiuscula ? c.toUpperCase() : c}
+              </Tecla>
+            ))}
+            <Tecla largura="w-16" onClick={apagar}>
+              ⌫
+            </Tecla>
+          </div>
+          <div className="flex gap-1.5 px-4">
+            {LINHA_LETRAS_2.map((c) => (
+              <Tecla key={c} onClick={() => digitar(c)}>
+                {maiuscula ? c.toUpperCase() : c}
+              </Tecla>
+            ))}
+          </div>
+          <div className="flex gap-1.5">
+            <Tecla largura="w-14" onClick={() => setMaiuscula((v) => !v)}>
+              {maiuscula ? "⬆" : "⇧"}
+            </Tecla>
+            {LINHA_LETRAS_3.map((c) => (
+              <Tecla key={c} onClick={() => digitar(c)}>
+                {maiuscula ? c.toUpperCase() : c}
+              </Tecla>
+            ))}
+            <Tecla largura="w-14" onClick={() => setMaiuscula((v) => !v)}>
+              {maiuscula ? "⬆" : "⇧"}
+            </Tecla>
+          </div>
+        </>
+      ) : (
+        <>
+          <div className="flex gap-1.5">
+            {LINHA_NUMEROS_1.map((c) => (
+              <Tecla key={c} onClick={() => digitar(c)}>
+                {c}
+              </Tecla>
+            ))}
+            <Tecla largura="w-16" onClick={apagar}>
+              ⌫
+            </Tecla>
+          </div>
+          <div className="flex gap-1.5">
+            {LINHA_NUMEROS_2.map((c) => (
+              <Tecla key={c} onClick={() => digitar(c)}>
+                {c}
+              </Tecla>
+            ))}
+          </div>
+          <div className="flex gap-1.5 px-10">
+            {LINHA_NUMEROS_3.map((c) => (
+              <Tecla key={c} onClick={() => digitar(c)}>
+                {c}
+              </Tecla>
+            ))}
+          </div>
+        </>
+      )}
+
       <div className="flex gap-1.5">
-        {LINHA_1.map((c) => (
-          <Tecla key={c} onClick={() => digitar(c)}>
-            {c}
-          </Tecla>
-        ))}
-      </div>
-      <div className="flex gap-1.5">
-        {LINHA_2.map((c) => (
-          <Tecla key={c} onClick={() => digitar(c)}>
-            {maiuscula ? c.toUpperCase() : c}
-          </Tecla>
-        ))}
-      </div>
-      <div className="flex gap-1.5">
-        {LINHA_3.map((c) => (
-          <Tecla key={c} onClick={() => digitar(c)}>
-            {maiuscula ? c.toUpperCase() : c}
-          </Tecla>
-        ))}
-      </div>
-      <div className="flex gap-1.5">
-        <Tecla largura="w-20" onClick={() => setMaiuscula((v) => !v)}>
-          {maiuscula ? "ABC" : "abc"}
+        <Tecla largura="w-16" fraca onClick={() => setPagina((p) => (p === "letras" ? "numeros" : "letras"))}>
+          {pagina === "letras" ? "?123" : "ABC"}
         </Tecla>
-        {LINHA_4.map((c) => (
-          <Tecla key={c} onClick={() => digitar(c)}>
-            {maiuscula ? c.toUpperCase() : c}
-          </Tecla>
-        ))}
-        <Tecla largura="w-20" onClick={apagar}>
-          ⌫
+        <Tecla largura="w-16" fraca onClick={() => setMostrarAcentos((v) => !v)}>
+          áçã
         </Tecla>
-      </div>
-      <div className="flex gap-1.5">
-        <Tecla largura="w-24" onClick={() => setMostrarAcentos((v) => !v)}>
-          á ã ç
-        </Tecla>
-        <Tecla onClick={() => digitar("@")} largura="w-16">
+        <Tecla largura="w-14" fraca onClick={() => digitar("@")}>
           @
         </Tecla>
         <Tecla onClick={() => digitar(" ")}>espaço</Tecla>
-        <Tecla largura="w-28" onClick={fechar}>
-          concluir
+        <Tecla largura="w-14" fraca onClick={() => moverCursor(-1)}>
+          ‹
+        </Tecla>
+        <Tecla largura="w-14" fraca onClick={() => moverCursor(1)}>
+          ›
+        </Tecla>
+        <Tecla largura="w-16" onClick={fechar}>
+          ⌨
         </Tecla>
       </div>
     </div>

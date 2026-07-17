@@ -13,7 +13,7 @@ export function TelaEscolha({ onEscolher, onSair }: TelaEscolhaProps) {
       <TopoTela onSair={onSair} variante="clara" />
 
       <div className="flex flex-1 flex-col items-center justify-center gap-16">
-        <h1 className="text-2xl font-extrabold tracking-wide sm:text-3xl" style={{ color: cores.textoClaro }}>
+        <h1 className="text-[28.8px] font-extrabold tracking-wide sm:text-[36px]" style={{ color: cores.textoClaro }}>
           ESCOLHA UMA DAS OPÇÕES
         </h1>
 
@@ -23,7 +23,7 @@ export function TelaEscolha({ onEscolher, onSair }: TelaEscolhaProps) {
         </div>
 
         <div className="max-w-xl rounded-md px-6 py-6" style={{ backgroundColor: cores.caixaEscura }}>
-          <p className="text-center text-lg" style={{ color: cores.textoClaro }}>
+          <p className="text-center text-[21.6px]" style={{ color: cores.textoClaro }}>
             Sua participação contribui para contar a história deste espaço e de todos que passam por ele.
           </p>
         </div>

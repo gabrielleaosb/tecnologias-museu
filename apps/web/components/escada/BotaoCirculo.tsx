@@ -19,7 +19,7 @@ export function BotaoCirculo({ icone, label, onClick, destaque, claro }: BotaoCi
         <Image src={icone} alt="" width={56} height={56} className="h-14 w-14 sm:h-16 sm:w-16" />
       </span>
       <span
-        className="text-lg sm:text-xl font-bold tracking-wide"
+        className="text-[21.6px] sm:text-[24px] font-bold tracking-wide"
         style={{ color: claro ? cores.textoClaro : cores.textoEscuro }}
       >
         {label}

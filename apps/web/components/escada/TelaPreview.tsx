@@ -30,7 +30,7 @@ export function TelaPreview({ tipo, midiaUrl, onConfirmar, onRegravar, onCancela
         </div>
         <button onClick={() => setTelaCheia(false)} className="flex items-center gap-2 cursor-pointer">
           <Image src="/icons/escada/voltar1.png" alt="" width={20} height={20} className="h-5 w-5" />
-          <span className="text-lg font-bold" style={{ color: cores.textoEscuro }}>
+          <span className="text-[21.6px] font-bold" style={{ color: cores.textoEscuro }}>
             VOLTAR
           </span>
         </button>
@@ -61,10 +61,10 @@ export function TelaPreview({ tipo, midiaUrl, onConfirmar, onRegravar, onCancela
         </button>
 
         <div className="flex flex-col gap-6 text-center sm:text-left">
-          <h1 className="text-xl font-extrabold sm:text-2xl" style={{ color: cores.textoEscuro }}>
+          <h1 className="text-[24px] font-extrabold sm:text-[28.8px]" style={{ color: cores.textoEscuro }}>
             Agora falta pouco,
           </h1>
-          <p className="text-lg" style={{ color: cores.textoEscuro }}>
+          <p className="text-[21.6px]" style={{ color: cores.textoEscuro }}>
             {tipo === "video" ? (
               <>
                 você pode assistir ao vídeo e, se preferir, descartar e gravar outro. Se gostou é só confirmar e seu
@@ -82,19 +82,19 @@ export function TelaPreview({ tipo, midiaUrl, onConfirmar, onRegravar, onCancela
           <div className="flex flex-col gap-4">
             <button onClick={onConfirmar} className="flex items-center gap-3 cursor-pointer">
               <Image src="/icons/escada/confirmar.png" alt="" width={26} height={26} className="h-6 w-6" />
-              <span className="text-lg font-semibold" style={{ color: cores.textoEscuro }}>
+              <span className="text-[21.6px] font-semibold" style={{ color: cores.textoEscuro }}>
                 CONFIRMAR
               </span>
             </button>
             <button onClick={onRegravar} className="flex items-center gap-3 cursor-pointer">
               <Image src="/icons/escada/refazer.png" alt="" width={26} height={26} className="h-6 w-6" />
-              <span className="text-lg font-semibold" style={{ color: cores.textoEscuro }}>
+              <span className="text-[21.6px] font-semibold" style={{ color: cores.textoEscuro }}>
                 {tipo === "video" ? "REGRAVAR" : "TIRAR OUTRA FOTO"}
               </span>
             </button>
             <button onClick={() => setConfirmandoCancelamento(true)} className="flex items-center gap-3 cursor-pointer">
               <Image src="/icons/escada/cancelar.png" alt="" width={26} height={26} className="h-6 w-6" />
-              <span className="text-lg font-semibold" style={{ color: cores.textoEscuro }}>
+              <span className="text-[21.6px] font-semibold" style={{ color: cores.textoEscuro }}>
                 CANCELAR
               </span>
             </button>
@@ -105,19 +105,19 @@ export function TelaPreview({ tipo, midiaUrl, onConfirmar, onRegravar, onCancela
       {confirmandoCancelamento && (
         <div className="absolute inset-0 flex items-center justify-center" style={{ backgroundColor: cores.overlayEscuro }}>
           <div className="flex flex-col items-center gap-6 text-center">
-            <p className="max-w-md text-xl font-bold text-white">Tem certeza que deseja cancelar?</p>
+            <p className="max-w-md text-[24px] font-bold text-white">Tem certeza que deseja cancelar?</p>
             <p className="max-w-md text-white">O depoimento será excluído permanentemente.</p>
             <div className="flex gap-4">
               <button
                 onClick={onCancelar}
-                className="rounded-md px-8 py-3 text-lg font-bold cursor-pointer"
+                className="rounded-md px-8 py-3 text-[21.6px] font-bold cursor-pointer"
                 style={{ backgroundColor: cores.botaoTan, color: cores.textoEscuro }}
               >
                 SIM
               </button>
               <button
                 onClick={() => setConfirmandoCancelamento(false)}
-                className="rounded-md bg-white px-8 py-3 text-lg font-bold cursor-pointer"
+                className="rounded-md bg-white px-8 py-3 text-[21.6px] font-bold cursor-pointer"
                 style={{ color: cores.textoEscuro }}
               >
                 NÃO

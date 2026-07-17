@@ -17,11 +17,11 @@ export function TelaAutorizacao({ nome, autorizado, onAutorizadoChange, onAnteri
         <Logo variante="escura" />
       </div>
       <div className="flex flex-1 flex-col items-center justify-center gap-8 text-center">
-        <h1 className="max-w-lg text-xl font-extrabold sm:text-2xl" style={{ color: cores.textoEscuro }}>
+        <h1 className="max-w-lg text-[24px] font-extrabold sm:text-[28.8px]" style={{ color: cores.textoEscuro }}>
           {nome || "Visitante"}, falta pouco, precisamos da sua autorização para que o museu utilize sua imagem.
         </h1>
 
-        <p className="text-lg" style={{ color: cores.textoEscuro }}>
+        <p className="text-[21.6px]" style={{ color: cores.textoEscuro }}>
           Clique aqui para permitir o uso.
         </p>
 
@@ -37,7 +37,7 @@ export function TelaAutorizacao({ nome, autorizado, onAutorizadoChange, onAnteri
               backgroundColor: autorizado ? cores.textoEscuro : "transparent",
             }}
           />
-          <span className="text-lg" style={{ color: cores.textoEscuro }}>
+          <span className="text-[21.6px]" style={{ color: cores.textoEscuro }}>
             Eu autorizo o uso da minha imagem
           </span>
         </button>

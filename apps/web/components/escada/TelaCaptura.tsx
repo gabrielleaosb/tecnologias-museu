@@ -31,7 +31,7 @@ export function TelaCaptura({ tipo, onCapturado, onAnterior }: TelaCapturaProps)
         <div className="relative aspect-video w-full overflow-hidden rounded-md bg-black">
           <video ref={camera.videoRef} autoPlay muted playsInline className="h-full w-full object-cover" />
           {camera.contagemRegressiva !== null && (
-            <div className="absolute right-4 top-4 flex h-14 w-14 items-center justify-center rounded-full bg-black/60 text-3xl text-white">
+            <div className="absolute right-4 top-4 flex h-14 w-14 items-center justify-center rounded-full bg-black/60 text-[36px] text-white">
               {camera.contagemRegressiva}
             </div>
           )}
@@ -40,10 +40,10 @@ export function TelaCaptura({ tipo, onCapturado, onAnterior }: TelaCapturaProps)
         <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
           {tipo === "video" ? (
             <>
-              <h1 className="text-xl font-extrabold sm:text-2xl" style={{ color: cores.textoEscuro }}>
+              <h1 className="text-[24px] font-extrabold sm:text-[28.8px]" style={{ color: cores.textoEscuro }}>
                 Posicione-se diante da câmera.
               </h1>
-              <p className="text-lg" style={{ color: cores.textoEscuro }}>
+              <p className="text-[21.6px]" style={{ color: cores.textoEscuro }}>
                 A câmera começará a gravar 5 segundos após você apertar no botão <strong>GRAVAR</strong>. Quando
                 terminar, aperte no botão <strong>PARAR</strong>.
               </p>
@@ -90,7 +90,7 @@ export function TelaCaptura({ tipo, onCapturado, onAnterior }: TelaCapturaProps)
               <div className="w-full max-w-xs">
                 <div className="flex items-center gap-2">
                   <Image src="/icons/escada/reloginho.png" alt="" width={20} height={20} className="h-5 w-5" />
-                  <span className="text-lg font-bold" style={{ color: cores.textoEscuro }}>
+                  <span className="text-[21.6px] font-bold" style={{ color: cores.textoEscuro }}>
                     {segundosFormatado} segundos
                   </span>
                 </div>
@@ -103,17 +103,17 @@ export function TelaCaptura({ tipo, onCapturado, onAnterior }: TelaCapturaProps)
                     }}
                   />
                 </div>
-                <p className="mt-2 text-sm" style={{ color: cores.textoEscuro }}>
+                <p className="mt-2 text-[16.8px]" style={{ color: cores.textoEscuro }}>
                   Até 1 minuto de duração.
                 </p>
               </div>
             </>
           ) : (
             <>
-              <h1 className="text-xl font-extrabold sm:text-2xl" style={{ color: cores.textoEscuro }}>
+              <h1 className="text-[24px] font-extrabold sm:text-[28.8px]" style={{ color: cores.textoEscuro }}>
                 Hora da foto!
               </h1>
-              <p className="text-lg" style={{ color: cores.textoEscuro }}>
+              <p className="text-[21.6px]" style={{ color: cores.textoEscuro }}>
                 Posicione-se diante da câmera e clique em <strong>FOTO</strong>. Após pressionar o botão, você terá 5
                 segundos para se preparar.
               </p>
@@ -139,7 +139,7 @@ export function TelaCaptura({ tipo, onCapturado, onAnterior }: TelaCapturaProps)
 
       <button onClick={onAnterior} className="flex items-center gap-2 self-start cursor-pointer">
         <Image src="/icons/escada/voltar1.png" alt="" width={20} height={20} className="h-5 w-5" />
-        <span className="text-lg font-bold" style={{ color: cores.textoEscuro }}>
+        <span className="text-[21.6px] font-bold" style={{ color: cores.textoEscuro }}>
           ANTERIOR
         </span>
       </button>
