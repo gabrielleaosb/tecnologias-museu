@@ -2,6 +2,9 @@ import { cores } from "@/lib/escada/cores";
 import { Logo } from "@/components/escada/Logo";
 import { Navegacao } from "@/components/escada/Navegacao";
 
+// Canvas 1920×1080. Inputs: max-w=827px→43.07vw, h=58px→5.37vh
+// Logo: left=47px→2.45vw, top=52px→4.81vh
+
 interface TelaOrigemProps {
   nome: string;
   pais: string;
@@ -15,25 +18,44 @@ interface TelaOrigemProps {
 export function TelaOrigem({ nome, pais, estado, onPaisChange, onEstadoChange, onAnterior, onProximo }: TelaOrigemProps) {
   const habilitado = pais.trim().length > 0 && estado.trim().length > 0;
 
+  const estiloInput: React.CSSProperties = {
+    flex: 1,
+    maxWidth: "43.07vw",
+    height: "5.37vh",
+    backgroundColor: "#E2B291",
+    borderRadius: "0.21vw",
+    color: cores.textoEscuro,
+    fontSize: "1.35vw",
+    padding: "0 1.5vw",
+    textAlign: "center",
+    outline: "none",
+  };
+
   return (
-    <div className="relative flex h-screen w-screen flex-col justify-between p-8 sm:p-12" style={{ backgroundColor: cores.fundoClaro }}>
-      <div className="absolute left-[47px] top-[52px] sm:left-[63px] sm:top-[68px]">
+    <div
+      className="relative flex h-screen w-screen flex-col justify-between"
+      style={{ backgroundColor: cores.fundoClaro, padding: "2.5vw" }}
+    >
+      <div style={{ position: "absolute", left: "2.45vw", top: "4.81vh" }}>
         <Logo variante="escura1-vertical" />
       </div>
-      <div className="flex flex-1 flex-col items-center justify-start gap-8 pt-16 text-center sm:pt-20">
-        <h1 className="text-[28.8px] font-extrabold sm:text-[34.56px]" style={{ color: cores.textoEscuro }}>
-          <span className="whitespace-nowrap">Olá {nome || "visitante"}, estamos prestes a começar.</span>
-          <br />
-          <span className="whitespace-nowrap font-normal">Antes disso, conte pra nós:</span>
+
+      <div
+        className="flex flex-1 flex-col items-center justify-start text-center"
+        style={{ gap: "1.67vw", paddingTop: "8.33vh" }}
+      >
+        <h1 className="font-extrabold" style={{ color: cores.textoEscuro, fontSize: "1.8vw" }}>
+          <span className="block whitespace-nowrap">Olá {nome || "visitante"}, estamos prestes a começar.</span>
+          <span className="block whitespace-nowrap font-normal">Antes disso, conte pra nós:</span>
         </h1>
 
-        <p className="text-[25.92px]" style={{ color: cores.textoEscuro }}>
+        <p style={{ color: cores.textoEscuro, fontSize: "1.35vw" }}>
           De onde você veio?
         </p>
 
-        <div className="flex w-full max-w-[900px] flex-col gap-3">
-          <label className="flex items-center gap-4">
-            <span className="w-24 text-left text-[19.2px] font-bold" style={{ color: cores.textoEscuro }}>
+        <div className="flex flex-col" style={{ width: "46.88vw", gap: "0.63vw" }}>
+          <label className="flex items-center" style={{ gap: "0.83vw" }}>
+            <span className="font-bold text-left" style={{ color: cores.textoEscuro, fontSize: "1vw", width: "5vw" }}>
               PAÍS
             </span>
             <input
@@ -42,19 +64,12 @@ export function TelaOrigem({ nome, pais, estado, onPaisChange, onEstadoChange, o
               value={pais}
               onChange={(e) => onPaisChange(e.target.value)}
               placeholder="Brasil"
-              className="flex-1 px-[28.8px] text-center text-[25.92px] outline-none placeholder:font-medium placeholder:text-[37px] placeholder:tracking-[3.7px] placeholder:text-[#3D2A1A]"
-              style={{
-                height: 58,
-                maxWidth: 827,
-                backgroundColor: "#E2B291",
-                borderRadius: 4,
-                opacity: 1,
-                color: cores.textoEscuro,
-              }}
+              className="outline-none placeholder:font-medium placeholder:text-[#3D2A1A]"
+              style={estiloInput}
             />
           </label>
-          <label className="flex items-center gap-4">
-            <span className="w-24 text-left text-[19.2px] font-bold" style={{ color: cores.textoEscuro }}>
+          <label className="flex items-center" style={{ gap: "0.83vw" }}>
+            <span className="font-bold text-left" style={{ color: cores.textoEscuro, fontSize: "1vw", width: "5vw" }}>
               ESTADO
             </span>
             <input
@@ -63,15 +78,8 @@ export function TelaOrigem({ nome, pais, estado, onPaisChange, onEstadoChange, o
               value={estado}
               onChange={(e) => onEstadoChange(e.target.value)}
               placeholder="Alagoas"
-              className="flex-1 px-[28.8px] text-center text-[25.92px] outline-none placeholder:font-medium placeholder:text-[37px] placeholder:tracking-[3.7px] placeholder:text-[#3D2A1A]"
-              style={{
-                height: 58,
-                maxWidth: 827,
-                backgroundColor: "#E2B291",
-                borderRadius: 4,
-                opacity: 1,
-                color: cores.textoEscuro,
-              }}
+              className="outline-none placeholder:font-medium placeholder:text-[#3D2A1A]"
+              style={estiloInput}
             />
           </label>
         </div>
@@ -82,8 +90,8 @@ export function TelaOrigem({ nome, pais, estado, onPaisChange, onEstadoChange, o
         onProximo={onProximo}
         proximoHabilitado={habilitado}
         centralizado
-        tamanhoTexto={25.92}
-        tamanhoIcone={24}
+        tamanhoTexto="1.35vw"
+        tamanhoIcone="1.25vw"
       />
     </div>
   );

@@ -4,13 +4,15 @@ import { cores } from "@/lib/escada/cores";
 import { Logo } from "@/components/escada/Logo";
 import { useCamera } from "@/lib/escada/useCamera";
 
+// Canvas 1920×1080. Botões círculo: 64px→3.33vw | ícones: 28px→1.46vw
+
+const DURACAO_MAXIMA_VIDEO_S = 60;
+
 interface TelaCapturaProps {
   tipo: "video" | "foto";
   onCapturado: (blob: Blob, url: string) => void;
   onAnterior: () => void;
 }
-
-const DURACAO_MAXIMA_VIDEO_S = 60;
 
 export function TelaCaptura({ tipo, onCapturado, onAnterior }: TelaCapturaProps) {
   const camera = useCamera(tipo === "video" ? "video" : "foto");
@@ -24,112 +26,122 @@ export function TelaCaptura({ tipo, onCapturado, onAnterior }: TelaCapturaProps)
 
   const segundosFormatado = String(camera.segundos).padStart(2, "0");
 
+  const BotaoAcao = ({ icone, label, onClick, desabilitado = false }: { icone: string; label: string; onClick: () => void; desabilitado?: boolean }) => (
+    <button
+      onClick={onClick}
+      disabled={desabilitado}
+      className="flex flex-col items-center cursor-pointer disabled:opacity-40"
+      style={{ gap: "0.42vw" }}
+    >
+      <span
+        className="flex items-center justify-center rounded-full"
+        style={{ width: "3.33vw", height: "3.33vw", backgroundColor: cores.botaoTan }}
+      >
+        <Image src={icone} alt="" width={28} height={28} style={{ width: "1.46vw", height: "1.46vw" }} />
+      </span>
+      <span className="font-bold" style={{ color: cores.textoEscuro, fontSize: "0.94vw" }}>
+        {label}
+      </span>
+    </button>
+  );
+
   return (
-    <div className="flex h-screen w-screen flex-col gap-8 p-8 sm:p-12" style={{ backgroundColor: cores.fundoClaro }}>
+    <div
+      className="flex h-screen w-screen flex-col"
+      style={{ backgroundColor: cores.fundoClaro, padding: "2.5vw", gap: "1.67vw" }}
+    >
       <Logo variante="escura" />
-      <div className="grid flex-1 grid-cols-1 items-center gap-10 sm:grid-cols-2">
-        <div className="relative aspect-video w-full overflow-hidden rounded-md bg-black">
+
+      <div className="grid flex-1 grid-cols-2 items-center" style={{ gap: "2.08vw" }}>
+        <div className="relative w-full overflow-hidden rounded-md bg-black" style={{ aspectRatio: "16/9" }}>
           <video ref={camera.videoRef} autoPlay muted playsInline className="h-full w-full object-cover" />
           {camera.contagemRegressiva !== null && (
-            <div className="absolute right-4 top-4 flex h-14 w-14 items-center justify-center rounded-full bg-black/60 text-[36px] text-white">
+            <div
+              className="absolute right-4 top-4 flex items-center justify-center rounded-full bg-black/60 text-white"
+              style={{ width: "2.92vw", height: "2.92vw", fontSize: "1.875vw" }}
+            >
               {camera.contagemRegressiva}
             </div>
           )}
         </div>
 
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
+        <div className="flex flex-col items-center text-center" style={{ gap: "1.25vw" }}>
           {tipo === "video" ? (
             <>
-              <h1 className="text-[24px] font-extrabold sm:text-[28.8px]" style={{ color: cores.textoEscuro }}>
+              <h1 className="font-extrabold" style={{ color: cores.textoEscuro, fontSize: "1.5vw" }}>
                 Posicione-se diante da câmera.
               </h1>
-              <p className="text-[21.6px]" style={{ color: cores.textoEscuro }}>
+              <p style={{ color: cores.textoEscuro, fontSize: "1.125vw" }}>
                 A câmera começará a gravar 5 segundos após você apertar no botão <strong>GRAVAR</strong>. Quando
                 terminar, aperte no botão <strong>PARAR</strong>.
               </p>
 
-              <div className="flex items-center gap-10">
+              <div className="flex items-center" style={{ gap: "2.08vw" }}>
                 {!camera.gravando ? (
-                  <button
+                  <BotaoAcao
+                    icone="/icons/escada/play.png"
+                    label="GRAVAR"
                     onClick={camera.iniciarGravacao}
-                    disabled={!camera.streamPronto || camera.contagemRegressiva !== null}
-                    className="flex flex-col items-center gap-2 cursor-pointer disabled:opacity-40"
-                  >
-                    <span className="flex h-16 w-16 items-center justify-center rounded-full" style={{ backgroundColor: cores.botaoTan }}>
-                      <Image src="/icons/escada/play.png" alt="" width={28} height={28} className="h-7 w-7" />
-                    </span>
-                    <span className="font-bold" style={{ color: cores.textoEscuro }}>
-                      GRAVAR
-                    </span>
-                  </button>
+                    desabilitado={!camera.streamPronto || camera.contagemRegressiva !== null}
+                  />
                 ) : (
-                  <div className="flex flex-col items-center gap-2">
-                    <span className="flex h-16 w-16 items-center justify-center rounded-full" style={{ backgroundColor: cores.botaoTan }}>
-                      <Image src="/icons/escada/gravando.png" alt="" width={28} height={28} className="h-7 w-7" />
+                  <div className="flex flex-col items-center" style={{ gap: "0.42vw" }}>
+                    <span
+                      className="flex items-center justify-center rounded-full"
+                      style={{ width: "3.33vw", height: "3.33vw", backgroundColor: cores.botaoTan }}
+                    >
+                      <Image src="/icons/escada/gravando.png" alt="" width={28} height={28} style={{ width: "1.46vw", height: "1.46vw" }} />
                     </span>
-                    <span className="font-bold" style={{ color: cores.textoEscuro }}>
+                    <span className="font-bold" style={{ color: cores.textoEscuro, fontSize: "0.94vw" }}>
                       GRAVANDO...
                     </span>
                   </div>
                 )}
-
-                <button
+                <BotaoAcao
+                  icone="/icons/escada/pause.png"
+                  label="PARAR"
                   onClick={camera.pararGravacao}
-                  disabled={!camera.gravando}
-                  className="flex flex-col items-center gap-2 cursor-pointer disabled:opacity-40"
-                >
-                  <span className="flex h-16 w-16 items-center justify-center rounded-full" style={{ backgroundColor: cores.botaoTan }}>
-                    <Image src="/icons/escada/pause.png" alt="" width={28} height={28} className="h-7 w-7" />
-                  </span>
-                  <span className="font-bold" style={{ color: cores.textoEscuro }}>
-                    PARAR
-                  </span>
-                </button>
+                  desabilitado={!camera.gravando}
+                />
               </div>
 
-              <div className="w-full max-w-xs">
-                <div className="flex items-center gap-2">
-                  <Image src="/icons/escada/reloginho.png" alt="" width={20} height={20} className="h-5 w-5" />
-                  <span className="text-[21.6px] font-bold" style={{ color: cores.textoEscuro }}>
+              <div style={{ width: "16.67vw" }}>
+                <div className="flex items-center" style={{ gap: "0.42vw" }}>
+                  <Image src="/icons/escada/reloginho.png" alt="" width={20} height={20} style={{ width: "1.04vw", height: "1.04vw" }} />
+                  <span className="font-bold" style={{ color: cores.textoEscuro, fontSize: "1.125vw" }}>
                     {segundosFormatado} segundos
                   </span>
                 </div>
-                <div className="mt-2 h-2 w-full rounded-full" style={{ backgroundColor: cores.botaoTan }}>
+                <div className="mt-2 w-full rounded-full" style={{ height: "0.42vw", backgroundColor: cores.botaoTan }}>
                   <div
-                    className="h-2 rounded-full"
+                    className="rounded-full"
                     style={{
+                      height: "0.42vw",
                       backgroundColor: cores.textoEscuro,
                       width: `${Math.min(100, (camera.segundos / DURACAO_MAXIMA_VIDEO_S) * 100)}%`,
                     }}
                   />
                 </div>
-                <p className="mt-2 text-[16.8px]" style={{ color: cores.textoEscuro }}>
+                <p className="mt-2" style={{ color: cores.textoEscuro, fontSize: "0.875vw" }}>
                   Até 1 minuto de duração.
                 </p>
               </div>
             </>
           ) : (
             <>
-              <h1 className="text-[24px] font-extrabold sm:text-[28.8px]" style={{ color: cores.textoEscuro }}>
+              <h1 className="font-extrabold" style={{ color: cores.textoEscuro, fontSize: "1.5vw" }}>
                 Hora da foto!
               </h1>
-              <p className="text-[21.6px]" style={{ color: cores.textoEscuro }}>
+              <p style={{ color: cores.textoEscuro, fontSize: "1.125vw" }}>
                 Posicione-se diante da câmera e clique em <strong>FOTO</strong>. Após pressionar o botão, você terá 5
                 segundos para se preparar.
               </p>
-
-              <button
+              <BotaoAcao
+                icone="/icons/escada/fotografar.png"
+                label="FOTO"
                 onClick={camera.tirarFoto}
-                disabled={!camera.streamPronto || camera.contagemRegressiva !== null}
-                className="flex flex-col items-center gap-2 cursor-pointer disabled:opacity-40"
-              >
-                <span className="flex h-16 w-16 items-center justify-center rounded-full" style={{ backgroundColor: cores.botaoTan }}>
-                  <Image src="/icons/escada/fotografar.png" alt="" width={28} height={28} className="h-7 w-7" />
-                </span>
-                <span className="font-bold" style={{ color: cores.textoEscuro }}>
-                  FOTO
-                </span>
-              </button>
+                desabilitado={!camera.streamPronto || camera.contagemRegressiva !== null}
+              />
             </>
           )}
 
@@ -137,9 +149,9 @@ export function TelaCaptura({ tipo, onCapturado, onAnterior }: TelaCapturaProps)
         </div>
       </div>
 
-      <button onClick={onAnterior} className="flex items-center gap-2 self-start cursor-pointer">
-        <Image src="/icons/escada/voltar1.png" alt="" width={20} height={20} className="h-5 w-5" />
-        <span className="text-[21.6px] font-bold" style={{ color: cores.textoEscuro }}>
+      <button onClick={onAnterior} className="flex items-center self-start cursor-pointer" style={{ gap: "0.42vw" }}>
+        <Image src="/icons/escada/voltar1.png" alt="" width={20} height={20} style={{ width: "1.04vw", height: "1.04vw" }} />
+        <span className="font-bold" style={{ color: cores.textoEscuro, fontSize: "1.125vw" }}>
           ANTERIOR
         </span>
       </button>

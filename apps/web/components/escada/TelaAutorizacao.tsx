@@ -12,32 +12,47 @@ interface TelaAutorizacaoProps {
 
 export function TelaAutorizacao({ nome, autorizado, onAutorizadoChange, onAnterior, onProximo }: TelaAutorizacaoProps) {
   return (
-    <div className="relative flex h-screen w-screen flex-col justify-between p-8 sm:p-12" style={{ backgroundColor: cores.fundoClaro }}>
-      <div className="absolute left-8 top-8 sm:left-12 sm:top-12">
+    <div
+      className="relative flex h-screen w-screen flex-col justify-between"
+      style={{ backgroundColor: cores.fundoClaro, padding: "2.5vw" }}
+    >
+      <div style={{ position: "absolute", left: "2.5vw", top: "2.5vw" }}>
         <Logo variante="escura" />
       </div>
-      <div className="flex flex-1 flex-col items-center justify-center gap-8 text-center">
-        <h1 className="max-w-lg text-[24px] font-extrabold sm:text-[28.8px]" style={{ color: cores.textoEscuro }}>
+
+      <div className="flex flex-1 flex-col items-center justify-center text-center" style={{ gap: "1.67vw" }}>
+        <h1
+          className="font-extrabold"
+          style={{ color: cores.textoEscuro, fontSize: "1.5vw", maxWidth: "26.67vw" }}
+        >
           {nome || "Visitante"}, falta pouco, precisamos da sua autorização para que o museu utilize sua imagem.
         </h1>
 
-        <p className="text-[21.6px]" style={{ color: cores.textoEscuro }}>
+        <p style={{ color: cores.textoEscuro, fontSize: "1.125vw" }}>
           Clique aqui para permitir o uso.
         </p>
 
         <button
           onClick={() => onAutorizadoChange(!autorizado)}
-          className="flex w-full max-w-md items-center gap-4 rounded-md px-5 py-4 cursor-pointer"
-          style={{ backgroundColor: cores.botaoTan }}
+          className="flex items-center cursor-pointer"
+          style={{
+            width: "23.33vw",
+            gap: "0.83vw",
+            borderRadius: "0.42vw",
+            padding: "0.83vw 1.04vw",
+            backgroundColor: cores.botaoTan,
+          }}
         >
           <span
-            className="h-6 w-6 flex-shrink-0 rounded-full border-2"
+            className="flex-shrink-0 rounded-full"
             style={{
-              borderColor: cores.textoEscuro,
+              width: "1.25vw",
+              height: "1.25vw",
+              border: `0.1vw solid ${cores.textoEscuro}`,
               backgroundColor: autorizado ? cores.textoEscuro : "transparent",
             }}
           />
-          <span className="text-[21.6px]" style={{ color: cores.textoEscuro }}>
+          <span style={{ color: cores.textoEscuro, fontSize: "1.125vw" }}>
             Eu autorizo o uso da minha imagem
           </span>
         </button>

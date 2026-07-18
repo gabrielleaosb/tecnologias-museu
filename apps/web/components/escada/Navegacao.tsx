@@ -1,13 +1,15 @@
 import Image from "next/image";
 import { cores } from "@/lib/escada/cores";
 
+// Tamanhos padrão em vw (canvas 1920px): texto 21.6px→1.125vw, ícone 20px→1.04vw
+
 interface NavegacaoProps {
   onAnterior?: () => void;
   onProximo?: () => void;
   proximoHabilitado?: boolean;
   centralizado?: boolean;
-  tamanhoTexto?: number;
-  tamanhoIcone?: number;
+  tamanhoTexto?: string;
+  tamanhoIcone?: string;
 }
 
 export function Navegacao({
@@ -15,22 +17,22 @@ export function Navegacao({
   onProximo,
   proximoHabilitado = true,
   centralizado = false,
-  tamanhoTexto = 21.6,
-  tamanhoIcone = 20,
+  tamanhoTexto = "1.125vw",
+  tamanhoIcone = "1.04vw",
 }: NavegacaoProps) {
   const classeContainer = centralizado
-    ? "pointer-events-none absolute inset-y-0 left-8 right-8 flex items-center justify-between sm:left-12 sm:right-12"
+    ? "pointer-events-none absolute inset-y-0 left-[1.67vw] right-[1.67vw] flex items-center justify-between"
     : "flex w-full items-center justify-between";
 
   return (
     <div className={classeContainer}>
       {onAnterior ? (
-        <button onClick={onAnterior} className="pointer-events-auto flex items-center gap-2 cursor-pointer">
+        <button onClick={onAnterior} className="pointer-events-auto flex items-center gap-[0.42vw] cursor-pointer">
           <Image
             src="/icons/escada/voltar1.png"
             alt=""
-            width={tamanhoIcone}
-            height={tamanhoIcone}
+            width={20}
+            height={20}
             style={{ width: tamanhoIcone, height: tamanhoIcone }}
           />
           <span className="font-bold tracking-wide" style={{ color: cores.textoEscuro, fontSize: tamanhoTexto }}>
@@ -45,7 +47,7 @@ export function Navegacao({
         <button
           onClick={onProximo}
           disabled={!proximoHabilitado}
-          className="pointer-events-auto flex items-center gap-2 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+          className="pointer-events-auto flex items-center gap-[0.42vw] cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
         >
           <span className="font-bold tracking-wide" style={{ color: cores.textoEscuro, fontSize: tamanhoTexto }}>
             PRÓXIMO
@@ -53,8 +55,8 @@ export function Navegacao({
           <Image
             src="/icons/escada/seta2.png"
             alt=""
-            width={tamanhoIcone}
-            height={tamanhoIcone}
+            width={20}
+            height={20}
             style={{ width: tamanhoIcone, height: tamanhoIcone }}
           />
         </button>

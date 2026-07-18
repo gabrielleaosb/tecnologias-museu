@@ -3,6 +3,10 @@ import { cores } from "@/lib/escada/cores";
 import { Logo } from "@/components/escada/Logo";
 import { Navegacao } from "@/components/escada/Navegacao";
 
+// Canvas 1920×1080. Inputs: w=827px→43.07vw, h=58px→5.37vh
+// Logo: left=47px→2.45vw, top=52px→4.81vh
+// Ícone vídeo/foto: 130.5px→6.79vw
+
 interface TelaInformacoesProps {
   tipo: "video" | "foto";
   nome: string;
@@ -16,48 +20,63 @@ interface TelaInformacoesProps {
 export function TelaInformacoes({ tipo, nome, email, onNomeChange, onEmailChange, onAnterior, onProximo }: TelaInformacoesProps) {
   const habilitado = nome.trim().length > 0 && email.trim().length > 0;
 
+  const estiloInput: React.CSSProperties = {
+    width: "43.07vw",
+    maxWidth: "100%",
+    height: "5.37vh",
+    backgroundColor: "#E2B291",
+    borderRadius: "0.21vw",
+    color: cores.textoEscuro,
+    fontSize: "1.35vw",
+    padding: "0 1.5vw",
+    outline: "none",
+  };
+
   return (
-    <div className="relative flex h-screen w-screen flex-col justify-between p-8 sm:p-12" style={{ backgroundColor: cores.fundoClaro }}>
-      <div className="absolute left-[47px] top-[52px] sm:left-[63px] sm:top-[68px]">
-        <Logo variante="escura1-vertical" />
+    <div
+      className="relative flex h-screen w-screen flex-col justify-between"
+      style={{ backgroundColor: cores.fundoClaro, padding: "2.5vw" }}
+    >
+      <div style={{ position: "absolute", left: "5.5vw", top: "calc(2.5vw + 2vh)" }}>
+        <Logo variante="escura1-vertical" style={{ width: "11.53vw" }} />
       </div>
-      <div className="flex flex-1 flex-col items-center justify-start gap-6 pt-16 text-center sm:pt-20">
+
+      <div
+        className="flex flex-1 flex-col items-center justify-start text-center"
+        style={{ gap: "1.25vw", paddingTop: "8.33vh" }}
+      >
         <Image
           src={tipo === "video" ? "/icons/escada/video.png" : "/icons/escada/foto.png"}
           alt=""
           width={131}
           height={131}
-          className="h-[130.5px] w-[130.5px]"
+          style={{ width: "6.79vw", height: "6.79vw" }}
         />
 
-        <h1 style={{ color: cores.textoEscuro, fontSize: 40, letterSpacing: 4 }}>
-          <span className="whitespace-nowrap font-bold">
+        <h1 style={{ color: cores.textoEscuro, fontSize: "2.08vw", letterSpacing: "4px" }}>
+          <span className="block whitespace-nowrap font-bold">
             Você optou por {tipo === "video" ? "gravar um vídeo" : "tirar uma foto"},
           </span>
-          <br />
-          <span className="whitespace-nowrap font-medium">siga as instruções, são apenas algumas etapas.</span>
+          <span className="block whitespace-nowrap font-medium">siga as instruções, são apenas algumas etapas.</span>
         </h1>
 
-        <p className="font-medium" style={{ color: "#895C3B", fontSize: 40, letterSpacing: 4 }}>
+        <p className="font-medium" style={{ color: "#895C3B", fontSize: "2.08vw", letterSpacing: "4px" }}>
           Informações básicas (obrigatório)
         </p>
 
-        <div className="flex w-full max-w-[827px] flex-col items-center gap-3">
+        <div className="flex flex-col items-center" style={{ gap: "0.63vw" }}>
           <input
             type="text"
             inputMode="none"
             value={nome}
             onChange={(e) => onNomeChange(e.target.value)}
             placeholder="Nome"
-            className="px-[28.8px] text-center text-[25.92px] outline-none placeholder:font-medium placeholder:text-[37px] placeholder:tracking-[3.7px] placeholder:text-[#3D2A1A]"
+            className="text-center outline-none placeholder:font-medium placeholder:text-[#3D2A1A]"
             style={{
-              width: 827,
-              maxWidth: "100%",
-              height: 58,
-              backgroundColor: "#E2B291",
-              borderRadius: 4,
-              opacity: 1,
-              color: cores.textoEscuro,
+              ...estiloInput,
+              // @ts-ignore
+              "--placeholder-font-size": "1.93vw",
+              "--placeholder-tracking": "3.7px",
             }}
           />
           <input
@@ -66,16 +85,8 @@ export function TelaInformacoes({ tipo, nome, email, onNomeChange, onEmailChange
             value={email}
             onChange={(e) => onEmailChange(e.target.value)}
             placeholder="E-mail"
-            className="px-[28.8px] text-center text-[25.92px] outline-none placeholder:font-medium placeholder:text-[37px] placeholder:tracking-[3.7px] placeholder:text-[#3D2A1A]"
-            style={{
-              width: 827,
-              maxWidth: "100%",
-              height: 58,
-              backgroundColor: "#E2B291",
-              borderRadius: 4,
-              opacity: 1,
-              color: cores.textoEscuro,
-            }}
+            className="text-center outline-none placeholder:font-medium placeholder:text-[#3D2A1A]"
+            style={estiloInput}
           />
         </div>
       </div>
@@ -85,8 +96,8 @@ export function TelaInformacoes({ tipo, nome, email, onNomeChange, onEmailChange
         onProximo={onProximo}
         proximoHabilitado={habilitado}
         centralizado
-        tamanhoTexto={25.92}
-        tamanhoIcone={24}
+        tamanhoTexto="1.35vw"
+        tamanhoIcone="1.25vw"
       />
     </div>
   );

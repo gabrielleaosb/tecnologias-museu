@@ -83,7 +83,14 @@ Cabine cenográfica embaixo da escada. Tablet + webcam. Visitante registra um de
 - Botões ANTERIOR/PRÓXIMO passaram a ficar centralizados verticalmente na tela (bordas esquerda/direita, meio da altura), via prop `centralizado` em `components/escada/Navegacao.tsx`, replicando o protótipo — não mudou a tela de Autorização, que segue com os botões no rodapé.
 - Teclado virtual: mudou de "empurrar a tela pra cima" para simplesmente sobrepor a tela (comportamento pedido por Gabriel); telas de input receberam `padding-top` extra pra que os campos fiquem acima da área ocupada pelo teclado quando aberto.
 
-**⚠️ Próxima alteração planejada:** revisar e ajustar a tela "Escolha uma das opções" (`components/escada/TelaEscolha.tsx` — escolha entre Vídeo/Foto, logo depois da tela de boas-vindas) contra o CSS/design exato do XD, seguindo o mesmo padrão de fidelidade pixel-a-pixel aplicado nas telas de Informações/Origem/Texto.
+**✅ Migração para unidades responsivas (2026-07-18):** todos os componentes da Escada convertidos de pixels fixos para `vw`/`vh` baseados no canvas 1920×1080 do XD. A proporção dos elementos se mantém em qualquer resolução de dispositivo sem overflow ou scroll. Arquivos afetados: `Logo.tsx`, `TopoTela.tsx`, `BotaoCirculo.tsx`, `Navegacao.tsx`, `ItemAcao.tsx`, `TelaBoasVindas.tsx`, `TelaEscolha.tsx`, `TelaAutorizacao.tsx`, `TelaCaptura.tsx`, `TelaInformacoes.tsx`, `TelaOrigem.tsx`, `TelaTexto.tsx`, `TelaPreview.tsx`, `TelaAgradecimento.tsx`.
+
+**✅ Fidelidade pixel-a-pixel: TelaBoasVindas e TelaEscolha (2026-07-18):**
+- `TelaBoasVindas`: título quebrado em 2 linhas com pesos distintos (Bold / ExtraBold / Medium), caixa com dimensões exatas do XD (`66.1vw × 22.3vh`, cor `#465760`), botão com `45.1vw × 12.69vh`, `border-radius: 3.59vw`, cor `#FFB50B`, texto `#491F0A` com letter-spacing 6.38px; logo horizontal aumentada para `16.67vw`.
+- `TelaEscolha`: logo `cinza-vertical` (`11.53vw`) com posição ajustada; botão SAIR espelhado horizontalmente em relação à logo; título "ESCOLHA UMA DAS OPÇÕES" posicionado absolutamente na altura do SAIR (Bold 40px, `2.08vw`); círculos dos botões `18.7vw` com ícones vídeo/foto em dimensões proporcionais ao XD; caixa escura `59.58vw × 15.56vh`, texto Futura PT Book 40px letter-spacing 4px. `TopoTela` e `Logo` agora aceitam props `logoStyle` e `sairStyle` para ajustes por tela sem afetar as demais.
+- `TelaInformacoes`: logo `escura1-vertical` alinhada ao mesmo tamanho e posição da TelaEscolha (`11.53vw`, `left: 5.5vw`, `top: calc(2.5vw + 2vh)`).
+
+**⚠️ Próxima alteração planejada:** continuar a passada de fidelidade pixel-a-pixel nas telas restantes do fluxo da Escada — `TelaAutorizacao`, `TelaCaptura`, `TelaPreview`, `TelaOrigem`, `TelaTexto` e `TelaAgradecimento` — aplicando CSS exportado do XD da mesma forma feita em TelaBoasVindas e TelaEscolha.
 
 ---
 
