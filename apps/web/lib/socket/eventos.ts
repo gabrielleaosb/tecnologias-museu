@@ -23,7 +23,7 @@ export interface ServerToClientEvents {
 }
 
 export interface ClientToServerEvents {
-  "sala1:entrar": (payload: { papel: "tablet" | "tv" }) => void;
+  "sala1:entrar": (payload: { papel: "tablet" | "tv" | "madmapper" }) => void;
   "sala1:iniciar": () => void;
   "sala1:selecionar-tema": (payload: { temaId: import("@/lib/sala1/temas").TemaId }) => void;
   "sala1:sair": () => void;

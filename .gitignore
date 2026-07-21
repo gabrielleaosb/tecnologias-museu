@@ -1,2 +1,5 @@
 # artefatos de teste do Playwright MCP (screenshots/logs de sessão)
 .playwright-mcp/
+
+# orçamento comercial — documento privado, não versionar
+orcamento*.pdf

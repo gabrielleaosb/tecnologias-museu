@@ -17,7 +17,7 @@ Sistema interativo para o Museu do Sertão de Piranhas, Alagoas. Composto por 3 
 ### 1. Sala 1 — Kiosk Interativo com Maquete
 
 **O que faz:**  
-Tablet exibe tela em loop de boas-vindas ("Maria", assistente virtual do museu, guia a experiência por vídeo). Visitante seleciona um tema. Um vídeo sobre o tema é reproduzido na TV. Ao terminar (ou se o visitante pular), a TV pergunta se ele quer ver outro tema. Roteiro completo em `apps/web/roteiro-sala1.txt`.
+Tablet exibe tela em loop de boas-vindas ("Maria", assistente virtual do museu, guia a experiência por vídeo). Visitante seleciona um tema. Um vídeo sobre o tema é reproduzido na TV **e, em paralelo, o MadMapper dispara um vídeo projetado sobre a maquete**. Ao terminar (ou se o visitante pular), a TV pergunta se ele quer ver outro tema. Roteiro completo em `apps/web/roteiro-sala1.txt`.
 
 **Temas (5, não 4 — "O Museu" foi adicionado):**
 - O Cangaço
@@ -26,7 +26,9 @@ Tablet exibe tela em loop de boas-vindas ("Maria", assistente virtual do museu, 
 - A Ferrovia
 - O Museu
 
-**Dispositivos:** 2 telas físicas sincronizadas — um **tablet** (mostra imagens estáticas com áreas clicáveis/hotspots sobre os botões) e uma **TV** (onde os vídeos tocam: standby, intro da Maria, vídeo do tema, pergunta de encerramento). A Sala 1 **não** integra com o MadMapper — essa integração é de outra sala (a definir).
+**Dispositivos:** 3 saídas físicas sincronizadas — um **tablet** (imagens estáticas com hotspots clicáveis sobre os botões), uma **TV** (onde os vídeos tocam: standby, intro da Maria, vídeo do tema, pergunta de encerramento) e um **projetor** com **projeção mapeada sobre a maquete** via **MadMapper**.
+
+A projeção sobre a maquete é disparada pelo **agente MadMapper** (`apps/agente-madmapper/`) — ver seção "Integração MadMapper" abaixo.
 
 **Máquina de estados (implementada em `lib/sala1/estado.ts`):**
 ```
@@ -127,7 +129,14 @@ Totem com chatbot guiado por menus sobre o tema Cangaço. Não é IA generativa 
 /sala1/tv     → Tela de exibição (loop + vídeo do tema), sincronizada via WebSocket
 /escada       → Cabine lambe-lambe (foto/vídeo)
 /sala7        → Galeria de depoimentos em loop (TV)
-/sala8        → Assistente virtual do Cangaço
+/sala8        → Assistente virtual do Cangaço (ainda não implementada)
+```
+
+### Pacotes do repositório
+
+```
+apps/web/              → App Next.js + Socket.IO (todas as salas)
+apps/agente-madmapper/ → Agente local do museu: escuta a Sala 1 e dispara cues OSC
 ```
 
 ### Infraestrutura (DECISÃO ATUALIZADA)
@@ -137,7 +146,53 @@ Totem com chatbot guiado por menus sobre o tema Cangaço. Não é IA generativa 
 - **AnyDesk** mantido nos PCs físicos para manutenção/suporte
 - Cada dispositivo (tablet, TV, totem) é um cliente (browser em modo kiosk) que se conecta à VPS
 - Sincronização entre telas da mesma sala (Sala 1: tablet↔TV; Escada→Sala7) passa a ser feita **pelo servidor central na VPS** via WebSocket, não mais por rede local do museu
-- MadMapper (outra sala, fora do escopo da Sala 1) segue como integração local — arquitetura de trigger a definir quando a sala responsável for detalhada
+- MadMapper é integração **da Sala 1** e roda **localmente no museu**, controlado por OSC/UDP através do agente em `apps/agente-madmapper/` — ver seção dedicada abaixo
+
+### Integração MadMapper (Sala 1)
+
+Ao selecionar um tema no tablet, o vídeo toca na TV **e** o MadMapper dispara, em paralelo, um vídeo projetado sobre a maquete.
+
+**Implementado em `apps/agente-madmapper/`** — pacote independente, com README próprio. Documentação completa de instalação e configuração está lá; o essencial:
+
+**Como o MadMapper é controlado:** por **OSC (Open Sound Control) sobre UDP** — não HTTP. Endereços no formato `/presets/<nome do cue>` (se o nome do cue tem espaço, o endereço tem espaço: `/presets/Cue 1`). Também existem `/presets/next` e `/presets/previous`. A porta de entrada OSC é configurável nas preferências do MadMapper, e ele suporta **OSC Query** para listar os endereços disponíveis — usar isso para descobrir os nomes exatos em vez de adivinhar.
+
+**Conceito de Cue:** o MadMapper tem uma grade de *Scenes* (restauram o estado completo do documento — surfaces, fixtures, mídias) e *Cues* (guardam um conjunto escolhido de parâmetros). Plano: mapear a maquete uma vez e salvar **um cue por tema** (Cangaço, A Cidade, Rio São Francisco, A Ferrovia, O Museu), cada um definindo qual vídeo toca em qual parte da maquete.
+
+**Por que um agente local:** o MadMapper roda na máquina do museu e só aceita comandos de dentro daquela rede; o app está numa VPS em São Paulo, que não alcança lá. O agente inverte o sentido da conexão — **sai** do museu para a VPS como cliente Socket.IO, e fala com o MadMapper por dentro da rede local. Dispensa IP fixo, port forwarding e mexer no firewall. **Não existe alternativa pelo navegador: browsers não enviam UDP.**
+
+**Fluxo:** o agente entra na sala como `papel: "madmapper"`, escuta `sala1:estado` e traduz cada estado numa chave (`standby`, `menu`, `tema:<id>`, `fim-video`, `encerrando`) que o `config.json` mapeia para um endereço OSC.
+
+**Status:** codificação OSC validada byte a byte (`npm run verificar`) e fluxo testado ponta a ponta contra servidor simulado — deduplicação, reconexão e estados sem cue configurado, todos conferidos. **Falta testar com MadMapper real.**
+
+**Pendências:** salvar os cues no MadMapper (um por tema) e obter os nomes exatos via OSC Query, confirmar a porta OSC, e definir em qual PC do museu o agente roda. Os endereços em `config.example.json` são placeholders não verificados.
+
+### Dimensionamento da VPS (DECIDIDO 2026-07-20)
+
+**Plano escolhido: Hostinger VPS KVM 2 — 2 vCPU · 8 GB RAM · 100 GB NVMe · 8 TB de tráfego, datacenter em São Paulo.**
+
+| Período | Custo |
+|---|---|
+| Promoção — 24 meses | **R$ 42,99/mês** (R$ 515,88/ano · R$ 1.031,76 em boleto único) |
+| Após 24 meses — renovação | **R$ 77,99/mês** (R$ 935,88/ano) |
+
+Inclui root completo, Docker/Docker Compose, backup semanal e domínio por 1 ano. Aceita **boleto e PIX**.
+
+**Os primeiros 24 meses (R$ 1.031,76, boleto único) entram no total do orçamento** — Gabriel recebe o valor e contrata o servidor. Como é desembolso único em BRL, não há exposição cambial nem cobrança recorrente. **A renovação a partir de setembro/2028 não está inclusa e é responsabilidade do museu** — precisa assumir a conta antes do vencimento, senão o servidor cai.
+
+**Por que Hostinger e não DigitalOcean:** o motivo original foi o **pagamento por boleto** — a DO só aceita cartão internacional em USD, e o museu precisa de boleto. Mas a troca ganhou em todos os eixos: custa ~40% do que a DO custaria (R$ 516 vs R$ 1.344/ano) entregando **4x a RAM, 2x a CPU e 2x o disco**; o datacenter em São Paulo (contra EUA) melhora de verdade a latência do sync tablet↔TV da Sala 1 e o carregamento dos vídeos; e provedor nacional **emite nota fiscal brasileira** — que a DO não emite e um museu provavelmente precisa para prestação de contas.
+
+**HostGator descartada:** infra decente (Oracle Cloud Brasil, root, Docker), mas o plano real sai a R$ 86,29/mês — o dobro da Hostinger por metade da RAM. O "a partir de R$ 21,69" da vitrine não corresponde ao plano necessário.
+
+**⚠️ Duas armadilhas na contratação:**
+1. **Tem que ser plano VPS, não hospedagem compartilhada.** Os planos de R$ 10–20/mês são cPanel/PHP e **não rodam este projeto** — ele exige processo Node permanente (Socket.IO), Postgres próprio, Docker, WebSocket e acesso root. Isso está escrito na página 3 do orçamento de propósito.
+2. **Confirmar o datacenter São Paulo no ato da compra** — a região é selecionável e há relatos de contratações que caíram fora do Brasil.
+
+**Deploy — "caminho C":** build local → `docker save | gzip` → `scp` → `docker load` no servidor. Não depende de GitHub Actions, registry nem de qualquer serviço externo, e é independente de provedor. Com 8 GB de RAM, buildar no próprio servidor virou plano reserva viável — o build do Next mede **16 segundos** neste projeto, então a preocupação com RAM de build deixou de existir.
+
+**Melhorias técnicas pendentes** (nenhuma bloqueante, todas válidas):
+1. **Caddy servindo estáticos direto** — hoje o `Caddyfile` faz `reverse_proxy web:3000` para *tudo*, então os 42 MB de vídeo da Sala 1 e as mídias dos depoimentos passam pelo Node. Precisa de `handle_path /videos/*` e `/uploads/*` com `file_server`
+2. **Limite de tamanho no upload de vídeo** — `lib/uploads.ts` faz `arrayBuffer()` do arquivo inteiro em memória, sem limite; travar em ~20 MB no client e no server
+3. **Enxugar o Dockerfile** — copia o `node_modules` inteiro (522 MB; só 9 das 21 deps são de produção) e o `.next` com cache, gerando imagem de mais de 1 GB. `npm ci --omit=dev` no estágio final deve levar a ~250–350 MB e acelerar muito o deploy
 
 ---
 
@@ -157,24 +212,36 @@ Com a decisão de hospedar em VPS (internet estável confirmada no museu), esta 
 | 4 | Conteúdo do assistente virtual da Sala 8 — os textos completos de cada tema? | Precisa estar pronto antes da Sala 8 estar completa |
 | 5 | Data exata da inauguração? | Define deadline real |
 | 6 | Haverá alguém do museu treinado para operação básica (religar cabo, reiniciar tablet)? | Define o nível do documento de operação a entregar |
-| 7 | Qual VPS/provedor será usado e quem paga por ela? | Define custo recorrente de infra (fora do orçamento original) |
-| 8 | Qual sala/dispositivo é responsável pelo trigger do MadMapper? | Sala 1 foi descartada dessa integração; precisa mapear qual sala assume |
+| ~~7~~ | ~~Qual VPS/provedor será usado e quem paga por ela?~~ | ✅ **RESOLVIDA (2026-07-20):** Hostinger VPS KVM 2 (São Paulo), R$ 42,99/mês por 24 meses; conta aberta e paga por boleto pelo próprio museu. Ver "Dimensionamento da VPS" acima. |
+| 8 | Nomes exatos dos cues no MadMapper, porta OSC, e em qual PC do museu roda o agente | Necessários para configurar `apps/agente-madmapper/config.json`. O trigger é da **Sala 1**. |
 
 ---
 
 ## Orçamento de Gabriel
 
+**✅ Fechado em 2026-07-20.** Documento entregável: `orcamento_gabriel_leao.pdf` na raiz (template de 7 páginas; páginas 2 "Mão de Obra", 3 "Custo de Hospedagem" e 4 "Forma de Pagamento" preenchidas). Backup do template em branco: `orcamento_gabriel_leao.BACKUP.pdf`.
+
 ```
-HONORÁRIOS DE DESENVOLVIMENTO
-  Desenvolvimento dos 3 sistemas         R$ 3.000 – R$ 5.000
+HONORÁRIO DE DESENVOLVIMENTO
+  Desenvolvimento dos 3 sistemas         R$ 4.500,00
+  (~116h estimadas → ~R$ 39/h)
+
+HOSPEDAGEM (primeiros 24 meses, boleto único)
+  Hostinger VPS KVM 2                    R$ 1.031,76
+
+FORMA DE PAGAMENTO
+  TOTAL — pagamento único na assinatura  R$ 5.531,76
+  PIX ou transferência, até 5 dias úteis
 
 DESPESAS REEMBOLSÁVEIS (cobradas separadamente)
   Deslocamento a Piranhas (2 viagens)    a calcular
-  Hospedagem (estimativa 2 noites × 2)  a calcular
+  Hospedagem (estimativa 2 noites × 2)   a calcular
 
 SUPORTE PÓS-INAUGURAÇÃO (opcional — propor ao cliente)
   Suporte por 3 meses                    R$ 300/mês
 ```
+
+**O boleto único dos primeiros 24 meses de hospedagem ENTRA no total** — Gabriel recebe e contrata o servidor. A **renovação a partir de setembro/2028 (R$ 77,99/mês) não está inclusa e é responsabilidade do museu**, que precisa assumir a conta antes do vencimento. Piso defensável de honorário caso o museu peça revisão: R$ 4.000.
 
 **Estimativa de horas de desenvolvimento:**
 
@@ -207,7 +274,7 @@ SUPORTE PÓS-INAUGURAÇÃO (opcional — propor ao cliente)
 
 ## Notas Técnicas
 
-- **MadMapper API:** porta 8080, trigger via HTTP GET, ex. `GET http://localhost:8080/action?name=cangaco`. Não é usada pela Sala 1 — pertence a outra sala, a mapear.
+- **MadMapper:** controlado por **OSC sobre UDP**, endereços tipo `/presets/Cue 1`, porta configurável nas preferências, com OSC Query para listar os endereços. É usado pela **Sala 1** através do agente local em `apps/agente-madmapper/` — ver seção "Integração MadMapper (Sala 1)".
 - **Docker Compose:** 3 serviços — `web` (Next.js + Socket.IO), `db` (Postgres), `caddy` (reverse proxy/TLS). Mesma stack sobe em VPS ou localmente.
 - **Chromium kiosk da TV precisa da flag `--autoplay-policy=no-user-gesture-required`** — a TV troca de vídeo sozinha (via WebSocket, sem clique/touch), e navegadores bloqueiam autoplay com som sem essa flag ou uma interação prévia do usuário. Sem ela, o vídeo troca mas não toca.
 - **AnyDesk:** instalado em cada PC para acesso remoto de Gabriel em caso de problema físico no dispositivo

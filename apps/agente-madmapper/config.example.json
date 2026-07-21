@@ -1,0 +1,22 @@
+{
+  "servidorUrl": "https://SEU-DOMINIO.com.br",
+
+  "madmapper": {
+    "host": "127.0.0.1",
+    "porta": 8010
+  },
+
+  "cues": {
+    "standby": { "endereco": "/presets/Standby" },
+    "menu": { "endereco": "/presets/Menu" },
+
+    "tema:cangaco": { "endereco": "/presets/Cangaco" },
+    "tema:cidade": { "endereco": "/presets/Cidade" },
+    "tema:rio-sao-francisco": { "endereco": "/presets/Rio Sao Francisco" },
+    "tema:ferrovia": { "endereco": "/presets/Ferrovia" },
+    "tema:museu": { "endereco": "/presets/Museu" },
+
+    "fim-video": null,
+    "encerrando": { "endereco": "/presets/Standby" }
+  }
+}
