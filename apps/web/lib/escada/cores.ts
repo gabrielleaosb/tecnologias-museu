@@ -1,6 +1,6 @@
 export const cores = {
   fundoEscuro: "#546975",
-  caixaEscura: "#46565F",
+  caixaEscura: "#465760",
   fundoClaro: "#FFEBE0",
   textoEscuro: "#3D2A1A",
   textoClaro: "#FFFFFF",
