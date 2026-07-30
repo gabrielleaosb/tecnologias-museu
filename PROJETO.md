@@ -113,6 +113,16 @@ Totem com chatbot guiado por menus sobre o tema Cangaço. Não é IA generativa 
 
 **Tratamento de erro:** resposta inválida exibe mensagem de "não entendi" e repete as opções.
 
+**Interação por voz (2026-07-30):** ao contrário das outras salas (touch), a Sala 8 é operada por voz — o visitante fala perto de um microfone e navega respondendo SIM/NÃO ou números (um a cinco). Sem síntese de voz (TTS): a resposta do personagem é só visual (vídeo/texto na tela), só a entrada é por voz. A área do microfone será fisicamente semi-isolada do salão pra reduzir ruído ambiente.
+
+**✅ Protótipo de reconhecimento de voz:** implementado em `/sala8/teste-voz`, usando a Web Speech API nativa do navegador (`SpeechRecognition`, `lang: "pt-BR"`) — sem infra extra, sem custo. A lógica de casamento de comando (normalização de texto + fuzzy match por distância de edição contra o vocabulário fechado sim/não/um-cinco) fica isolada em `lib/sala8/reconhecimentoVoz.ts`.
+
+**⚠️ Achado crítico: exige Google Chrome real, não Chromium puro.** A Web Speech API depende do serviço de nuvem do Google, acessado por uma chave de API que só vem embutida no Chrome oficial. Testado e confirmado em 2026-07-30: no Chromium puro (o mesmo binário hoje documentado no kiosk das outras salas, `chromium --kiosk`) e no Brave, o reconhecimento trava indefinidamente sem nenhum evento disparar; no Google Chrome real, o pipeline funciona normalmente (`start` → `audiostart` → `soundstart` → `speechstart`). **Implicação:** o PC da Sala 8 vai precisar rodar `google-chrome-stable --kiosk` em vez de `chromium --kiosk` — única sala com essa exigência. Ainda não validada a taxa de acerto com fala real (o teste automatizado só confirma que a infraestrutura conecta, não a precisão).
+
+**Alternativa considerada, não adotada por ora:** reconhecimento no servidor via motor offline com gramática restrita (ex: Vosk), com o navegador só capturando áudio — independe de navegador/fabricante, mas exige bem mais horas de implementação. Fica como plano B caso a precisão do Chrome real fique abaixo do aceitável em campo.
+
+**Pendências:** roteiro completo do fluxo ainda não recebido (há um rascunho parcial em `TECNOLOGIAS.md`, seção "Tecnologia Sala 8"); textos completos de cada tema (dúvida em aberto #4); validação de precisão do reconhecimento com fala real e ruído de ambiente.
+
 ---
 
 ## Arquitetura Técnica
@@ -127,7 +137,7 @@ Totem com chatbot guiado por menus sobre o tema Cangaço. Não é IA generativa 
 | Armazenamento de mídia | Volume Docker (`/public/videos`, uploads da Escada) |
 | Empacotamento/deploy | Docker + Docker Compose (`web`, `db`, `caddy`) |
 | Reverse proxy / TLS | Caddy |
-| Browser nos dispositivos | Chromium em modo kiosk (`--kiosk --noerrors`) |
+| Browser nos dispositivos | Chromium em modo kiosk (`--kiosk --noerrors`) — **exceção: Sala 8 precisa de Google Chrome real**, ver seção Sala 8 |
 
 ### Rotas do app
 
@@ -136,7 +146,8 @@ Totem com chatbot guiado por menus sobre o tema Cangaço. Não é IA generativa 
 /sala1/tv     → Tela de exibição (loop + vídeo do tema), sincronizada via WebSocket
 /escada       → Cabine lambe-lambe (foto/vídeo)
 /sala7        → Galeria de depoimentos em loop (TV)
-/sala8        → Assistente virtual do Cangaço (ainda não implementada)
+/sala8        → Assistente virtual do Cangaço (ainda não implementada — fluxo completo)
+/sala8/teste-voz → Protótipo isolado de reconhecimento de voz (POC, fora do fluxo final)
 ```
 
 ### Pacotes do repositório
@@ -286,4 +297,5 @@ SUPORTE PÓS-INAUGURAÇÃO (opcional — propor ao cliente)
 - **Chromium kiosk da TV precisa da flag `--autoplay-policy=no-user-gesture-required`** — a TV troca de vídeo sozinha (via WebSocket, sem clique/touch), e navegadores bloqueiam autoplay com som sem essa flag ou uma interação prévia do usuário. Sem ela, o vídeo troca mas não toca.
 - **AnyDesk:** instalado em cada PC para acesso remoto de Gabriel em caso de problema físico no dispositivo
 - **LGPD:** com a mudança para VPS, fotos e vídeos dos visitantes (Escada) passam a trafegar e ficar armazenados no servidor central — revisar política de privacidade/termo de uso de imagem considerando esse armazenamento remoto (antes seria só local)
+- **Sala 8 exige Google Chrome real, não Chromium puro.** O reconhecimento de voz (`SpeechRecognition`/Web Speech API) depende da chave de API do Google embutida só no Chrome oficial — confirmado que trava sem erro em Chromium puro e no Brave. Ver seção Sala 8 para detalhes e o protótipo em `/sala8/teste-voz`.
 - **HTTPS é obrigatório para a webcam da Escada.** `getUserMedia` (captura de câmera no navegador) só funciona em "contexto seguro" — HTTPS ou `localhost`. Em produção na VPS, isso significa que precisa de um domínio público real apontando pro IP da VPS, definido em `.env` (`DOMAIN=...`, ver `.env.example`) — o Caddy emite certificado Let's Encrypt automaticamente para esse domínio (`Caddyfile`). Para testar a Escada numa rede local sem domínio público (ex: mini PC + tablet na mesma rede do museu antes de ter DNS configurado), usar `docker compose -f docker-compose.yml -f docker-compose.local-tls.yml up -d`, que sobe o Caddy com certificado autoassinado (`Caddyfile.local` + `tls internal`) — os dispositivos vão precisar confiar nesse certificado manualmente uma vez (aviso de "conexão não segura" no Chromium, aceitar/prosseguir) já que não é validado por uma CA pública.
