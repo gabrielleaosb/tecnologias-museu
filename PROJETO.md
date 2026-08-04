@@ -216,7 +216,11 @@ Inclui root completo, Docker/Docker Compose, backup semanal e domínio por 1 ano
 **Melhorias técnicas pendentes** (nenhuma bloqueante, todas válidas):
 1. **Caddy servindo estáticos direto** — hoje o `Caddyfile` faz `reverse_proxy web:3000` para *tudo*, então os 42 MB de vídeo da Sala 1 e as mídias dos depoimentos passam pelo Node. Precisa de `handle_path /videos/*` e `/uploads/*` com `file_server`
 2. **Limite de tamanho no upload de vídeo** — `lib/uploads.ts` faz `arrayBuffer()` do arquivo inteiro em memória, sem limite; travar em ~20 MB no client e no server
-3. **Enxugar o Dockerfile** — copia o `node_modules` inteiro (522 MB; só 9 das 21 deps são de produção) e o `.next` com cache, gerando imagem de mais de 1 GB. `npm ci --omit=dev` no estágio final deve levar a ~250–350 MB e acelerar muito o deploy
+3. ~~**Enxugar o Dockerfile**~~ ✅ **FEITO (2026-08-04): 1,29 GB → 879 MB.** Três mudanças, medidas com build real: estágio `prod-deps` separado com `npm ci --omit=dev`; `rm -rf .next/cache` após o build; e remoção de `@next/swc-linux-x64-gnu`. Imagem validada subindo contra o Postgres — migrations aplicam e as 6 rotas principais respondem 200, sem erro no log.
+   - **A estimativa de 250–350 MB era inalcançável** e vale corrigir o raciocínio: partia da ideia de que o peso era devDependency, mas o `node_modules` de produção sozinho tem 510 MB, dos quais **420 MB são o próprio Next** (`@next/swc` + `next/dist/compiled`). Cortar dev deps rendeu bem menos que o esperado.
+   - **O maior ganho isolado foi o binário SWC duplicado:** o npm instalava as variantes glibc **e** musl do `@next/swc-linux-x64` (124 MB cada) por não decidir a libc sozinho. A base é Alpine, então a glibc nunca era carregada — 124 MB de peso morto. Se a imagem base deixar de ser Alpine, a linha que remove precisa sair junto.
+   - **`tsx` foi movido de devDependencies para dependencies** — é dependência de produção de fato, já que `npm run start` executa `server.ts` e as migrations direto em TypeScript. Sem isso o `--omit=dev` gera uma imagem que builda e quebra no boot.
+   - **Próximo corte disponível:** `public/` são 57 MB dentro da imagem (42 MB de vídeo da Sala 1 + 14 MB de imagem). Sai de graça junto com a melhoria 1 desta lista — servindo estáticos pelo Caddy a partir de um volume, em vez de embutir na imagem.
 
 ---
 
