@@ -41,10 +41,12 @@ export default function EscadaPage() {
   const [passo, setPasso] = useState<Passo>("boas-vindas");
   const [dados, setDados] = useState(ESTADO_INICIAL);
   const [enviando, setEnviando] = useState(false);
+  const [erroEnvio, setErroEnvio] = useState<string | null>(null);
 
   function reiniciar() {
     if (dados.midiaUrl) URL.revokeObjectURL(dados.midiaUrl);
     setDados(ESTADO_INICIAL);
+    setErroEnvio(null);
     setPasso("boas-vindas");
   }
 
@@ -79,6 +81,7 @@ export default function EscadaPage() {
     if (!dados.tipo || !dados.midiaBlob) return;
 
     setEnviando(true);
+    setErroEnvio(null);
 
     const formData = new FormData();
     formData.set("nome", dados.nome);
@@ -91,12 +94,26 @@ export default function EscadaPage() {
     formData.set("arquivo", dados.midiaBlob, dados.tipo === "video" ? "depoimento.webm" : "depoimento.jpg");
 
     try {
-      await fetch("/api/depoimentos", { method: "POST", body: formData });
-    } finally {
-      setEnviando(false);
+      const resposta = await fetch("/api/depoimentos", { method: "POST", body: formData });
+
+      if (!resposta.ok) {
+        // Antes, qualquer falha caía no `finally` e o visitante via a tela de
+        // agradecimento mesmo com o depoimento perdido.
+        setErroEnvio(
+          resposta.status === 413
+            ? "O vídeo ficou grande demais para ser enviado. Grave um mais curto e tente de novo."
+            : "Não foi possível enviar seu depoimento. Toque em PRÓXIMO para tentar de novo."
+        );
+        return;
+      }
+
       if (dados.midiaUrl) URL.revokeObjectURL(dados.midiaUrl);
       setDados(ESTADO_INICIAL);
       setPasso("agradecimento");
+    } catch {
+      setErroEnvio("Não foi possível enviar seu depoimento. Toque em PRÓXIMO para tentar de novo.");
+    } finally {
+      setEnviando(false);
     }
   }
 
@@ -211,6 +228,7 @@ export default function EscadaPage() {
             onTextoChange={(texto) => setDados((d) => ({ ...d, texto }))}
             onProximo={confirmarDepoimento}
             enviando={enviando}
+            erro={erroEnvio}
           />
         );
 

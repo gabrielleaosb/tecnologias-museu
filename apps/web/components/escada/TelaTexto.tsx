@@ -13,9 +13,11 @@ interface TelaTextoProps {
   onTextoChange: (v: string) => void;
   onProximo: () => void;
   enviando: boolean;
+  /** Mensagem de falha no envio; mantém o visitante na tela para tentar de novo. */
+  erro?: string | null;
 }
 
-export function TelaTexto({ tipo, texto, onTextoChange, onProximo, enviando }: TelaTextoProps) {
+export function TelaTexto({ tipo, texto, onTextoChange, onProximo, enviando, erro }: TelaTextoProps) {
   return (
     <div
       className="relative flex h-screen w-screen flex-col justify-start"
@@ -52,6 +54,12 @@ export function TelaTexto({ tipo, texto, onTextoChange, onProximo, enviando }: T
           {texto.length}/{LIMITE_CARACTERES} caracteres
         </span>
       </div>
+
+      {erro && (
+        <p className="font-bold" style={{ color: "#B3261E", fontSize: "1.2vw" }} role="alert">
+          {erro}
+        </p>
+      )}
 
       <div className="pointer-events-none absolute inset-y-0 flex items-center" style={{ right: "2.5vw" }}>
         <button

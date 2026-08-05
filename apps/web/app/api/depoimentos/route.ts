@@ -2,7 +2,11 @@ import { NextResponse } from "next/server";
 import { desc } from "drizzle-orm";
 import { db } from "@/lib/db/client";
 import { depoimentos } from "@/lib/db/schema";
-import { salvarArquivoDepoimento } from "@/lib/uploads";
+import {
+  ErroArquivoGrandeDemais,
+  TAMANHO_MAXIMO_UPLOAD_BYTES,
+  salvarArquivoDepoimento,
+} from "@/lib/uploads";
 import { getIO } from "@/lib/socket/server-instance";
 import { SALA7_ROOM, type DepoimentoPublico } from "@/lib/socket/eventos";
 
@@ -35,7 +39,20 @@ export async function GET(request: Request) {
   return NextResponse.json(filtradas.map(paraDepoimentoPublico));
 }
 
+/** Folga sobre o teto do arquivo para os campos de texto e o overhead do multipart. */
+const FOLGA_MULTIPART_BYTES = 64 * 1024;
+
 export async function POST(request: Request) {
+  // Barreira antes do `formData()`: ele carrega o corpo inteiro na memória, de
+  // modo que qualquer verificação posterior já chegaria tarde demais.
+  const tamanhoDeclarado = Number(request.headers.get("content-length"));
+  if (tamanhoDeclarado > TAMANHO_MAXIMO_UPLOAD_BYTES + FOLGA_MULTIPART_BYTES) {
+    return NextResponse.json(
+      { erro: "Arquivo muito grande.", limiteBytes: TAMANHO_MAXIMO_UPLOAD_BYTES },
+      { status: 413 }
+    );
+  }
+
   const formData = await request.formData();
 
   const nome = formData.get("nome");
@@ -60,7 +77,20 @@ export async function POST(request: Request) {
     return NextResponse.json({ erro: "Dados inválidos." }, { status: 400 });
   }
 
-  const arquivoUrl = await salvarArquivoDepoimento(arquivo);
+  // Segunda barreira: o Content-Length pode não corresponder ao tamanho real
+  // do arquivo dentro do multipart.
+  let arquivoUrl: string;
+  try {
+    arquivoUrl = await salvarArquivoDepoimento(arquivo);
+  } catch (erro) {
+    if (erro instanceof ErroArquivoGrandeDemais) {
+      return NextResponse.json(
+        { erro: "Arquivo muito grande.", limiteBytes: TAMANHO_MAXIMO_UPLOAD_BYTES },
+        { status: 413 }
+      );
+    }
+    throw erro;
+  }
 
   const [novo] = await db
     .insert(depoimentos)

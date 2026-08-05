@@ -53,7 +53,14 @@ export function useCamera(tipo: "foto" | "video") {
     if (!stream) return;
 
     chunksRef.current = [];
-    const gravador = new MediaRecorder(stream, { mimeType: "video/webm" });
+    // Sem bitrate explícito o navegador escolhe conforme a resolução da webcam,
+    // e o tamanho do arquivo deixa de ser previsível. Travado aqui para que
+    // 60s caibam com folga no teto de upload (TAMANHO_MAXIMO_UPLOAD_BYTES).
+    const gravador = new MediaRecorder(stream, {
+      mimeType: "video/webm",
+      videoBitsPerSecond: 2_000_000,
+      audioBitsPerSecond: 128_000,
+    });
     gravador.ondataavailable = (evento) => {
       if (evento.data.size > 0) chunksRef.current.push(evento.data);
     };
