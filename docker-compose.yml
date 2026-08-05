@@ -34,6 +34,11 @@ services:
       - "443:443"
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile
+      # Estáticos servidos pelo Caddy sem passar pelo Node. Os vídeos vêm do
+      # repositório (versionados no git); os uploads, do mesmo volume onde o
+      # web grava — somente leitura, quem escreve é o web.
+      - ./apps/web/public/videos:/srv/videos:ro
+      - uploads_data:/srv/uploads:ro
       - caddy_data:/data
     depends_on:
       - web

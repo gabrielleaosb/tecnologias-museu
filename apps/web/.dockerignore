@@ -1,5 +1,10 @@
 node_modules
 .next
+
+# Os 42 MB de vídeo da Sala 1 não entram na imagem: o Caddy os serve por bind
+# mount do repositório (ver Caddyfile e docker-compose.yml). Consequência: a
+# imagem sozinha, sem o Caddy na frente, devolve 404 em /videos/*.
+public/videos
 .git
 *.md
 .env
