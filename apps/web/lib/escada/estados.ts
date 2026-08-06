@@ -1,0 +1,32 @@
+// 26 estados + Distrito Federal, em ordem alfabética.
+// O valor gravado no banco é o nome por extenso, porque é assim que a Sala 7 exibe
+// ("VEIO DE / ALAGOAS / BRASIL", ver design/escada/Galeria de Depoimentos, p.2).
+export const ESTADOS_BRASIL = [
+  "Acre",
+  "Alagoas",
+  "Amapá",
+  "Amazonas",
+  "Bahia",
+  "Ceará",
+  "Distrito Federal",
+  "Espírito Santo",
+  "Goiás",
+  "Maranhão",
+  "Mato Grosso",
+  "Mato Grosso do Sul",
+  "Minas Gerais",
+  "Pará",
+  "Paraíba",
+  "Paraná",
+  "Pernambuco",
+  "Piauí",
+  "Rio de Janeiro",
+  "Rio Grande do Norte",
+  "Rio Grande do Sul",
+  "Rondônia",
+  "Roraima",
+  "Santa Catarina",
+  "São Paulo",
+  "Sergipe",
+  "Tocantins",
+] as const;

@@ -4,9 +4,12 @@ import { depoimentos } from "@/lib/db/schema";
 
 export const dynamic = "force-dynamic";
 import { coresAdmin } from "@/lib/admin/cores";
+import { medidasAdmin, u, UNIDADE_ADMIN } from "@/lib/admin/medidas";
 import { ListaDepoimentos } from "@/components/admin/ListaDepoimentos";
 import { BotaoLogout } from "@/components/admin/BotaoLogout";
 import type { DepoimentoPublico } from "@/lib/socket/eventos";
+
+const { cabecalho: c } = medidasAdmin;
 
 export default async function AdminPage() {
   const linhas = await db.select().from(depoimentos).orderBy(desc(depoimentos.criadoEm));
@@ -24,22 +27,58 @@ export default async function AdminPage() {
   }));
 
   return (
-    <div className="min-h-screen w-full p-8 sm:p-12" style={{ backgroundColor: coresAdmin.fundo }}>
-      <div className="mb-12 flex items-center justify-between">
-        <h1 className="text-3xl font-extrabold text-white">DEPOIMENTOS</h1>
-        <div className="flex gap-4">
-          <a
-            href="/api/admin/relatorio"
-            className="rounded-md px-5 py-2 font-bold cursor-pointer"
-            style={{ backgroundColor: coresAdmin.botaoAcao, color: coresAdmin.fundo }}
+    <div className="min-h-screen w-full" style={{ backgroundColor: coresAdmin.fundo }}>
+      {/* container-type: inline-size faz `1cqw` valer 1% da largura desta caixa.
+          As medidas em `u` ficam nos filhos: num elemento que é ele mesmo o container,
+          unidades cq resolvem contra o container de fora, não contra ele próprio. */}
+      <div
+        className="mx-auto w-full"
+        style={
+          {
+            "--u": UNIDADE_ADMIN,
+            containerType: "inline-size",
+            maxWidth: medidasAdmin.larguraMaxima,
+          } as React.CSSProperties
+        }
+      >
+        <div style={{ paddingTop: u(3.5), paddingBottom: u(6) }}>
+        <header
+          className="flex items-end justify-between"
+          style={{ paddingInline: u(c.padding), marginBottom: u(5.63) }}
+        >
+          <h1
+            style={{
+              color: coresAdmin.texto,
+              fontSize: u(c.titulo),
+              fontWeight: 300,
+              letterSpacing: "0.105em",
+              lineHeight: 1,
+            }}
           >
-            Criar Relatório
-          </a>
-          <BotaoLogout />
+            DEPOIMENTOS
+          </h1>
+
+          <div className="flex" style={{ gap: u(c.botao.espaco) }}>
+            <a
+              href="/api/admin/relatorio"
+              className="flex cursor-pointer items-center justify-center"
+              style={{
+                width: u(c.larguraRelatorio),
+                height: u(c.botao.altura),
+                backgroundColor: coresAdmin.botaoAcao,
+                color: coresAdmin.fundo,
+                fontSize: u(c.botao.texto),
+              }}
+            >
+              Criar Relatório
+            </a>
+            <BotaoLogout />
+          </div>
+        </header>
+
+          <ListaDepoimentos depoimentosIniciais={lista} />
         </div>
       </div>
-
-      <ListaDepoimentos depoimentosIniciais={lista} />
     </div>
   );
 }

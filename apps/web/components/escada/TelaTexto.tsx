@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { cores } from "@/lib/escada/cores";
+import { ESCADA } from "@/lib/escada/estilos";
 import { Logo } from "@/components/escada/Logo";
 
 // Canvas 1920×1080
@@ -21,23 +22,24 @@ export function TelaTexto({ tipo, texto, onTextoChange, onProximo, enviando, err
   return (
     <div
       className="relative flex h-screen w-screen flex-col justify-start"
-      style={{ backgroundColor: cores.fundoClaro, padding: "2.5vw", paddingTop: "11.11vh", gap: "1.67vw" }}
+      style={{ ...ESCADA.tela, paddingTop: `calc(2.5vw + ${ESCADA.recuoAbaixoDaLogo})`, gap: "1.67vw" }}
     >
-      <div style={{ position: "absolute", left: "2.45vw", top: "4.81vh" }}>
-        <Logo variante="escura1-vertical" />
+      <div style={ESCADA.logo.posicao}>
+        <Logo variante="escura1-vertical" style={{ width: ESCADA.logo.largura }} />
       </div>
 
       <div style={{ paddingRight: "6.25vw" }}>
-        <h1 className="font-extrabold" style={{ color: cores.textoEscuro, fontSize: "1.8vw" }}>
-          <span className="block whitespace-nowrap">Para complementar {tipo === "video" ? "o vídeo" : "a foto"},</span>
-          <span className="block whitespace-nowrap font-normal">você pode acrescentar um texto. (Opcional)</span>
+        <h1 style={ESCADA.texto.titulo}>
+          <span className="block whitespace-nowrap font-bold">
+            Para complementar {tipo === "video" ? "o vídeo" : "a foto"},
+          </span>
+          <span className="block whitespace-nowrap font-medium">você pode acrescentar um texto. (Opcional)</span>
         </h1>
       </div>
 
       <div className="flex flex-col items-end" style={{ gap: "0.42vw" }}>
         <textarea
           value={texto}
-          inputMode="none"
           maxLength={LIMITE_CARACTERES}
           onChange={(e) => onTextoChange(e.target.value)}
           placeholder="Escreva aqui, se quiser."
@@ -46,17 +48,17 @@ export function TelaTexto({ tipo, texto, onTextoChange, onProximo, enviando, err
           style={{
             backgroundColor: cores.botaoTan,
             color: cores.textoEscuro,
-            fontSize: "1.35vw",
+            fontSize: ESCADA.texto.corpo.fontSize,
             padding: "2vw",
           }}
         />
-        <span style={{ color: cores.textoEscuro, fontSize: "1.05vw" }}>
+        <span style={ESCADA.texto.apoio}>
           {texto.length}/{LIMITE_CARACTERES} caracteres
         </span>
       </div>
 
       {erro && (
-        <p className="font-bold" style={{ color: "#B3261E", fontSize: "1.2vw" }} role="alert">
+        <p className="font-bold" style={{ color: "#B3261E", fontSize: ESCADA.texto.corpo.fontSize }} role="alert">
           {erro}
         </p>
       )}
@@ -68,11 +70,11 @@ export function TelaTexto({ tipo, texto, onTextoChange, onProximo, enviando, err
           className="pointer-events-auto flex items-center cursor-pointer disabled:opacity-40"
           style={{ gap: "0.42vw" }}
         >
-          <span className="font-bold" style={{ color: cores.textoEscuro, fontSize: "1.35vw" }}>
+          <span className="font-bold" style={ESCADA.texto.corpo}>
             {enviando ? "ENVIANDO..." : "PRÓXIMO"}
           </span>
           {!enviando && (
-            <Image src="/icons/escada/seta2.png" alt="" width={24} height={24} style={{ width: "1.25vw", height: "1.25vw" }} />
+            <Image src="/icons/escada/seta2.png" alt="" width={24} height={24} style={{ width: ESCADA.navegacao.tamanhoIcone, height: ESCADA.navegacao.tamanhoIcone }} />
           )}
         </button>
       </div>

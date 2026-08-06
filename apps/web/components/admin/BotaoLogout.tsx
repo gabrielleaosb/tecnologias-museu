@@ -2,6 +2,9 @@
 
 import { useRouter } from "next/navigation";
 import { coresAdmin } from "@/lib/admin/cores";
+import { medidasAdmin, u } from "@/lib/admin/medidas";
+
+const { cabecalho: c } = medidasAdmin;
 
 export function BotaoLogout() {
   const router = useRouter();
@@ -15,8 +18,14 @@ export function BotaoLogout() {
   return (
     <button
       onClick={handleLogout}
-      className="rounded-md px-5 py-2 font-bold cursor-pointer"
-      style={{ backgroundColor: coresAdmin.botaoSecundario, color: coresAdmin.fundo }}
+      className="flex cursor-pointer items-center justify-center"
+      style={{
+        width: u(c.larguraLogout),
+        height: u(c.botao.altura),
+        backgroundColor: coresAdmin.botaoSecundario,
+        color: coresAdmin.texto,
+        fontSize: u(c.botao.texto),
+      }}
     >
       Logout
     </button>

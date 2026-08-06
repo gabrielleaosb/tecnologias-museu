@@ -3,6 +3,9 @@
 import { useState } from "react";
 import type { DepoimentoPublico } from "@/lib/socket/eventos";
 import { coresAdmin } from "@/lib/admin/cores";
+import { medidasAdmin, u } from "@/lib/admin/medidas";
+
+const { lista: m, nome: mNome, mensagem: mMsg, acao: mAcao } = medidasAdmin;
 
 export function ListaDepoimentos({ depoimentosIniciais }: { depoimentosIniciais: DepoimentoPublico[] }) {
   const [depoimentos, setDepoimentos] = useState(depoimentosIniciais);
@@ -23,48 +26,130 @@ export function ListaDepoimentos({ depoimentosIniciais }: { depoimentosIniciais:
   }
 
   if (depoimentos.length === 0) {
-    return <p className="text-white/70">Nenhum depoimento registrado ainda.</p>;
+    return (
+      <p style={{ paddingInline: u(m.padding), color: coresAdmin.texto, fontSize: u(mAcao.texto), opacity: 0.7 }}>
+        Nenhum depoimento registrado ainda.
+      </p>
+    );
   }
 
   return (
-    <div className="grid grid-cols-1 gap-x-10 gap-y-10 sm:grid-cols-2">
+    <div
+      className="flex flex-col"
+      style={{ paddingInline: u(m.padding), gap: u(m.espacoVertical) }}
+    >
       {depoimentos.map((d) => (
-        <div key={d.id} className="grid grid-cols-[auto_1fr_auto] items-start gap-4">
-          <div className="flex flex-col gap-2">
-            <div className="relative h-28 w-40 overflow-hidden rounded-md bg-black">
+        <div key={d.id} className="flex items-start">
+          <div className="flex-none" style={{ width: u(m.colunas.midia) }}>
+            <div className="relative w-full overflow-hidden bg-black" style={{ aspectRatio: "16 / 9" }}>
               {d.tipo === "video" ? (
                 <video src={d.arquivoUrl} muted preload="metadata" className="h-full w-full object-cover" />
               ) : (
                 <img src={d.arquivoUrl} alt={d.nome} className="h-full w-full object-cover" />
               )}
+              {d.tipo === "video" && <TrianguloPlay />}
             </div>
-            <span className="text-sm font-bold text-white">{d.nome.toUpperCase()}</span>
+
+            <span
+              className="block w-full truncate font-bold"
+              style={{
+                marginTop: u(mNome.espacoAcima),
+                color: coresAdmin.texto,
+                fontSize: u(mNome.texto),
+                letterSpacing: u(mNome.espacamento),
+              }}
+            >
+              {d.nome.toUpperCase()}
+            </span>
+
+            <div style={{ marginTop: u(mAcao.espacoAposNome), width: u(m.colunas.acoes) }}>
+              <BotaoDeletar onClick={() => deletarTudo(d.id)}>Deletar tudo</BotaoDeletar>
+            </div>
           </div>
 
-          <div className="rounded-md p-4" style={{ backgroundColor: coresAdmin.cardMensagem }}>
-            <p className="text-xs font-bold text-white">DEIXOU ESTA MENSAGEM:</p>
-            <p className="mt-1 text-sm text-white/90">{d.texto ?? "(sem mensagem)"}</p>
-          </div>
+          <div
+            className="flex-none"
+            style={{
+              marginLeft: u(m.espacoColunas.midiaMensagem),
+              marginTop: u(mMsg.deslocamentoTopo),
+              width: u(m.colunas.mensagem),
+            }}
+          >
+            <div
+              style={{
+                minHeight: u(mMsg.alturaMinima),
+                padding: u(mMsg.padding),
+                backgroundColor: coresAdmin.cardMensagem,
+              }}
+            >
+              <p
+                className="font-bold"
+                style={{ color: coresAdmin.texto, fontSize: u(mMsg.titulo), letterSpacing: u(mMsg.espacamento) }}
+              >
+                DEIXOU ESTA MENSAGEM:
+              </p>
+              <p
+                className="text-justify"
+                style={{
+                  marginTop: u(mMsg.espacoTitulo),
+                  color: coresAdmin.texto,
+                  fontSize: u(mMsg.corpo),
+                  lineHeight: 1.55,
+                }}
+              >
+                {d.texto ?? "(sem mensagem)"}
+              </p>
+            </div>
 
-          <div className="flex flex-col gap-2">
-            <button
-              onClick={() => deletarMensagem(d.id)}
-              disabled={!d.texto}
-              className="rounded-md px-4 py-2 text-sm font-bold text-white cursor-pointer disabled:opacity-40"
-              style={{ backgroundColor: coresAdmin.botaoDeletar }}
-            >
-              Deletar mensagem
-            </button>
-            <button
-              onClick={() => deletarTudo(d.id)}
-              className="rounded-md px-4 py-2 text-sm font-bold text-white cursor-pointer"
-              style={{ backgroundColor: coresAdmin.botaoDeletar }}
-            >
-              Deletar tudo
-            </button>
+            <div style={{ marginTop: u(mAcao.espacoAposMensagem), width: u(m.colunas.acoes), marginInline: "auto" }}>
+              <BotaoDeletar onClick={() => deletarMensagem(d.id)} desabilitado={!d.texto}>
+                Deletar mensagem
+              </BotaoDeletar>
+            </div>
           </div>
         </div>
       ))}
     </div>
+  );
+}
+
+function BotaoDeletar({
+  onClick,
+  desabilitado = false,
+  children,
+}: {
+  onClick: () => void;
+  desabilitado?: boolean;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      disabled={desabilitado}
+      className="w-full cursor-pointer disabled:cursor-not-allowed disabled:opacity-40"
+      style={{
+        height: u(mAcao.altura),
+        backgroundColor: coresAdmin.botaoDeletar,
+        color: coresAdmin.texto,
+        fontSize: u(mAcao.texto),
+        fontWeight: 500,
+      }}
+    >
+      {children}
+    </button>
+  );
+}
+
+// No protótipo o indicador de vídeo é um triângulo branco sólido, sem círculo em volta.
+function TrianguloPlay() {
+  return (
+    <svg
+      viewBox="0 0 100 100"
+      className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
+      style={{ width: u(3.8), height: u(3.8) }}
+      aria-hidden
+    >
+      <polygon points="20,8 92,50 20,92" fill="#FFFFFF" />
+    </svg>
   );
 }

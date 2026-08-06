@@ -10,7 +10,7 @@ import { TelaCaptura } from "@/components/escada/TelaCaptura";
 import { TelaPreview } from "@/components/escada/TelaPreview";
 import { TelaTexto } from "@/components/escada/TelaTexto";
 import { TelaAgradecimento } from "@/components/escada/TelaAgradecimento";
-import { TecladoVirtual } from "@/components/escada/TecladoVirtual";
+import { PAIS_PADRAO } from "@/lib/escada/paises";
 
 type Passo =
   | "boas-vindas"
@@ -29,7 +29,8 @@ const ESTADO_INICIAL = {
   tipo: null as "video" | "foto" | null,
   nome: "",
   email: "",
-  pais: "",
+  // Brasil já vem escolhido; o visitante só mexe no país se vier de fora.
+  pais: PAIS_PADRAO,
   estado: "",
   autorizacaoImagem: false,
   midiaBlob: null as Blob | null,
@@ -117,12 +118,7 @@ export default function EscadaPage() {
     }
   }
 
-  return (
-    <>
-      <div id="escada-conteudo">{renderizarPasso()}</div>
-      <TecladoVirtual />
-    </>
-  );
+  return renderizarPasso();
 
   function renderizarPasso() {
     switch (passo) {
@@ -160,6 +156,7 @@ export default function EscadaPage() {
       case "origem":
         return (
           <TelaOrigem
+            tipo={dados.tipo ?? "foto"}
             nome={dados.nome}
             pais={dados.pais}
             estado={dados.estado}
@@ -173,6 +170,7 @@ export default function EscadaPage() {
       case "autorizacao":
         return (
           <TelaAutorizacao
+            tipo={dados.tipo ?? "foto"}
             nome={dados.nome}
             autorizado={dados.autorizacaoImagem}
             onAutorizadoChange={(autorizacaoImagem) => setDados((d) => ({ ...d, autorizacaoImagem }))}

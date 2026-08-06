@@ -3,3 +3,6 @@
 
 # orçamento comercial — documento privado, não versionar
 orcamento*.pdf
+
+# credenciais de acesso — nunca versionar
+ACESSOS.txt

@@ -1,10 +1,10 @@
 import { useEffect } from "react";
 import Image from "next/image";
 import { cores } from "@/lib/escada/cores";
+import { ESCADA } from "@/lib/escada/estilos";
 import { Logo } from "@/components/escada/Logo";
+import { Navegacao } from "@/components/escada/Navegacao";
 import { useCamera } from "@/lib/escada/useCamera";
-
-// Canvas 1920×1080. Botões círculo: 64px→3.33vw | ícones: 28px→1.46vw
 
 const DURACAO_MAXIMA_VIDEO_S = 60;
 
@@ -35,24 +35,25 @@ export function TelaCaptura({ tipo, onCapturado, onAnterior }: TelaCapturaProps)
     >
       <span
         className="flex items-center justify-center rounded-full"
-        style={{ width: "3.33vw", height: "3.33vw", backgroundColor: cores.botaoTan }}
+        style={{ width: ESCADA.botaoCaptura.tamanho, height: ESCADA.botaoCaptura.tamanho, backgroundColor: cores.botaoTan }}
       >
-        <Image src={icone} alt="" width={28} height={28} style={{ width: "1.46vw", height: "1.46vw" }} />
+        <Image src={icone} alt="" width={28} height={28} style={{ width: ESCADA.botaoCaptura.icone, height: ESCADA.botaoCaptura.icone }} />
       </span>
-      <span className="font-bold" style={{ color: cores.textoEscuro, fontSize: "0.94vw" }}>
+      <span className="font-bold" style={ESCADA.texto.corpo}>
         {label}
       </span>
     </button>
   );
 
   return (
-    <div
-      className="flex h-screen w-screen flex-col"
-      style={{ backgroundColor: cores.fundoClaro, padding: "2.5vw", gap: "1.67vw" }}
-    >
-      <Logo variante="escura" />
+    <div className="relative flex h-screen w-screen flex-col justify-between" style={{ ...ESCADA.tela, gap: "1.67vw" }}>
+      <div style={ESCADA.logo.posicao}>
+        <Logo variante="escura1-vertical" style={{ width: ESCADA.logo.largura }} />
+      </div>
 
-      <div className="grid flex-1 grid-cols-2 items-center" style={{ gap: "2.08vw" }}>
+      {/* A logo vertical é mais alta que a horizontal que estava aqui antes, então o
+          conteúdo desce para não passar por baixo dela. */}
+      <div className="grid grid-cols-2 items-center" style={{ gap: "2.08vw", paddingTop: ESCADA.recuoAbaixoDaLogo }}>
         <div className="relative w-full overflow-hidden rounded-md bg-black" style={{ aspectRatio: "16/9" }}>
           <video ref={camera.videoRef} autoPlay muted playsInline className="h-full w-full object-cover" />
           {camera.contagemRegressiva !== null && (
@@ -68,10 +69,10 @@ export function TelaCaptura({ tipo, onCapturado, onAnterior }: TelaCapturaProps)
         <div className="flex flex-col items-center text-center" style={{ gap: "1.25vw" }}>
           {tipo === "video" ? (
             <>
-              <h1 className="font-extrabold" style={{ color: cores.textoEscuro, fontSize: "1.5vw" }}>
+              <h1 className="font-bold" style={ESCADA.texto.titulo}>
                 Posicione-se diante da câmera.
               </h1>
-              <p style={{ color: cores.textoEscuro, fontSize: "1.125vw" }}>
+              <p className="font-medium" style={ESCADA.texto.corpo}>
                 A câmera começará a gravar 5 segundos após você apertar no botão <strong>GRAVAR</strong>. Quando
                 terminar, aperte no botão <strong>PARAR</strong>.
               </p>
@@ -88,11 +89,11 @@ export function TelaCaptura({ tipo, onCapturado, onAnterior }: TelaCapturaProps)
                   <div className="flex flex-col items-center" style={{ gap: "0.42vw" }}>
                     <span
                       className="flex items-center justify-center rounded-full"
-                      style={{ width: "3.33vw", height: "3.33vw", backgroundColor: cores.botaoTan }}
+                      style={{ width: ESCADA.botaoCaptura.tamanho, height: ESCADA.botaoCaptura.tamanho, backgroundColor: cores.botaoTan }}
                     >
-                      <Image src="/icons/escada/gravando.png" alt="" width={28} height={28} style={{ width: "1.46vw", height: "1.46vw" }} />
+                      <Image src="/icons/escada/gravando.png" alt="" width={28} height={28} style={{ width: ESCADA.botaoCaptura.icone, height: ESCADA.botaoCaptura.icone }} />
                     </span>
-                    <span className="font-bold" style={{ color: cores.textoEscuro, fontSize: "0.94vw" }}>
+                    <span className="font-bold" style={ESCADA.texto.corpo}>
                       GRAVANDO...
                     </span>
                   </div>
@@ -108,7 +109,7 @@ export function TelaCaptura({ tipo, onCapturado, onAnterior }: TelaCapturaProps)
               <div style={{ width: "16.67vw" }}>
                 <div className="flex items-center" style={{ gap: "0.42vw" }}>
                   <Image src="/icons/escada/reloginho.png" alt="" width={20} height={20} style={{ width: "1.04vw", height: "1.04vw" }} />
-                  <span className="font-bold" style={{ color: cores.textoEscuro, fontSize: "1.125vw" }}>
+                  <span className="font-bold" style={ESCADA.texto.corpo}>
                     {segundosFormatado} segundos
                   </span>
                 </div>
@@ -122,17 +123,17 @@ export function TelaCaptura({ tipo, onCapturado, onAnterior }: TelaCapturaProps)
                     }}
                   />
                 </div>
-                <p className="mt-2" style={{ color: cores.textoEscuro, fontSize: "0.875vw" }}>
+                <p className="mt-2" style={ESCADA.texto.apoio}>
                   Até 1 minuto de duração.
                 </p>
               </div>
             </>
           ) : (
             <>
-              <h1 className="font-extrabold" style={{ color: cores.textoEscuro, fontSize: "1.5vw" }}>
+              <h1 className="font-bold" style={ESCADA.texto.titulo}>
                 Hora da foto!
               </h1>
-              <p style={{ color: cores.textoEscuro, fontSize: "1.125vw" }}>
+              <p className="font-medium" style={ESCADA.texto.corpo}>
                 Posicione-se diante da câmera e clique em <strong>FOTO</strong>. Após pressionar o botão, você terá 5
                 segundos para se preparar.
               </p>
@@ -149,12 +150,10 @@ export function TelaCaptura({ tipo, onCapturado, onAnterior }: TelaCapturaProps)
         </div>
       </div>
 
-      <button onClick={onAnterior} className="flex items-center self-start cursor-pointer" style={{ gap: "0.42vw" }}>
-        <Image src="/icons/escada/voltar1.png" alt="" width={20} height={20} style={{ width: "1.04vw", height: "1.04vw" }} />
-        <span className="font-bold" style={{ color: cores.textoEscuro, fontSize: "1.125vw" }}>
-          ANTERIOR
-        </span>
-      </button>
+      {/* Aqui o ANTERIOR fica no rodapé, não na altura do meio como nas outras telas:
+          a prévia da câmera ocupa a metade esquerda e o botão centralizado cairia em
+          cima dela. É também o que o protótipo faz (p.9, 10 e 14). */}
+      <Navegacao onAnterior={onAnterior} {...ESCADA.navegacao} />
     </div>
   );
 }

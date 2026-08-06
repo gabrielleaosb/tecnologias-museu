@@ -1,11 +1,13 @@
-import { cores } from "@/lib/escada/cores";
+import Image from "next/image";
+import { ESCADA } from "@/lib/escada/estilos";
 import { Logo } from "@/components/escada/Logo";
 import { Navegacao } from "@/components/escada/Navegacao";
-
-// Canvas 1920×1080. Inputs: max-w=827px→43.07vw, h=58px→5.37vh
-// Logo: left=47px→2.45vw, top=52px→4.81vh
+import { SeletorOpcao } from "@/components/escada/SeletorOpcao";
+import { ESTADOS_BRASIL } from "@/lib/escada/estados";
+import { PAISES, PAIS_PADRAO } from "@/lib/escada/paises";
 
 interface TelaOrigemProps {
+  tipo: "video" | "foto";
   nome: string;
   pais: string;
   estado: string;
@@ -15,71 +17,80 @@ interface TelaOrigemProps {
   onProximo: () => void;
 }
 
-export function TelaOrigem({ nome, pais, estado, onPaisChange, onEstadoChange, onAnterior, onProximo }: TelaOrigemProps) {
-  const habilitado = pais.trim().length > 0 && estado.trim().length > 0;
+export function TelaOrigem({ tipo, nome, pais, estado, onPaisChange, onEstadoChange, onAnterior, onProximo }: TelaOrigemProps) {
+  // A lista de estados só vale para o Brasil. Para qualquer outro país o campo fica
+  // desabilitado e some da validação — senão o PRÓXIMO nunca habilitaria.
+  const exigeEstado = pais === PAIS_PADRAO;
+  const habilitado = pais.trim().length > 0 && (!exigeEstado || estado.trim().length > 0);
+
+  function selecionarPais(novoPais: string) {
+    onPaisChange(novoPais);
+    if (novoPais !== PAIS_PADRAO && estado) onEstadoChange("");
+  }
 
   const estiloInput: React.CSSProperties = {
-    flex: 1,
-    maxWidth: "43.07vw",
-    height: "5.37vh",
-    backgroundColor: "#E2B291",
-    borderRadius: "0.21vw",
-    color: cores.textoEscuro,
-    fontSize: "1.35vw",
-    padding: "0 1.5vw",
+    ...ESCADA.campo,
+    width: ESCADA.origem.campo,
+    maxWidth: "100%",
     textAlign: "center",
-    outline: "none",
   };
 
   return (
-    <div
-      className="relative flex h-screen w-screen flex-col justify-between"
-      style={{ backgroundColor: cores.fundoClaro, padding: "2.5vw" }}
-    >
-      <div style={{ position: "absolute", left: "2.45vw", top: "4.81vh" }}>
-        <Logo variante="escura1-vertical" />
+    <div className="relative flex h-screen w-screen flex-col justify-between" style={ESCADA.tela}>
+      <div style={ESCADA.logo.posicao}>
+        <Logo variante="escura1-vertical" style={{ width: ESCADA.logo.largura }} />
       </div>
 
-      <div
-        className="flex flex-1 flex-col items-center justify-start text-center"
-        style={{ gap: "1.67vw", paddingTop: "8.33vh" }}
-      >
-        <h1 className="font-extrabold" style={{ color: cores.textoEscuro, fontSize: "1.8vw" }}>
-          <span className="block whitespace-nowrap">Olá {nome || "visitante"}, estamos prestes a começar.</span>
-          <span className="block whitespace-nowrap font-normal">Antes disso, conte pra nós:</span>
+      <div className="flex flex-1 flex-col items-center justify-start text-center" style={ESCADA.conteudo}>
+        <Image
+          src={tipo === "video" ? "/icons/escada/video.png" : "/icons/escada/foto.png"}
+          alt=""
+          width={131}
+          height={131}
+          style={{ width: ESCADA.icone, height: ESCADA.icone }}
+        />
+
+        <h1 style={ESCADA.texto.titulo}>
+          <span className="block whitespace-nowrap font-bold">
+            Olá {nome || "visitante"}, estamos prestes a começar.
+          </span>
+          <span className="block whitespace-nowrap font-medium">Antes disso, conte pra nós:</span>
         </h1>
 
-        <p style={{ color: cores.textoEscuro, fontSize: "1.35vw" }}>
+        <p className="font-medium" style={ESCADA.texto.secundario}>
           De onde você veio?
         </p>
 
-        <div className="flex flex-col" style={{ width: "46.88vw", gap: "0.63vw" }}>
-          <label className="flex items-center" style={{ gap: "0.83vw" }}>
-            <span className="font-bold text-left" style={{ color: cores.textoEscuro, fontSize: "1vw", width: "5vw" }}>
+        <div className="flex flex-col" style={{ gap: "0.63vw" }}>
+          <label className="flex items-center" style={{ gap: ESCADA.origem.espaco }}>
+            <span className="font-bold text-left" style={{ ...ESCADA.texto.corpo, width: ESCADA.origem.rotulo }}>
               PAÍS
             </span>
-            <input
-              type="text"
-              inputMode="none"
-              value={pais}
-              onChange={(e) => onPaisChange(e.target.value)}
+            <SeletorOpcao
+              valor={pais}
+              opcoes={PAISES}
+              onChange={selecionarPais}
               placeholder="Brasil"
-              className="outline-none placeholder:font-medium placeholder:text-[#3D2A1A]"
-              style={estiloInput}
+              titulo="De qual país você veio?"
+              colunas={4}
+              larguraColuna="15vw"
+              estilo={estiloInput}
             />
           </label>
-          <label className="flex items-center" style={{ gap: "0.83vw" }}>
-            <span className="font-bold text-left" style={{ color: cores.textoEscuro, fontSize: "1vw", width: "5vw" }}>
+          <label className="flex items-center" style={{ gap: ESCADA.origem.espaco }}>
+            <span className="font-bold text-left" style={{ ...ESCADA.texto.corpo, width: ESCADA.origem.rotulo }}>
               ESTADO
             </span>
-            <input
-              type="text"
-              inputMode="none"
-              value={estado}
-              onChange={(e) => onEstadoChange(e.target.value)}
+            <SeletorOpcao
+              valor={estado}
+              opcoes={ESTADOS_BRASIL}
+              onChange={onEstadoChange}
               placeholder="Alagoas"
-              className="outline-none placeholder:font-medium placeholder:text-[#3D2A1A]"
-              style={estiloInput}
+              titulo="De qual estado você veio?"
+              colunas={3}
+              larguraColuna="18vw"
+              desabilitado={!exigeEstado}
+              estilo={estiloInput}
             />
           </label>
         </div>
@@ -90,8 +101,7 @@ export function TelaOrigem({ nome, pais, estado, onPaisChange, onEstadoChange, o
         onProximo={onProximo}
         proximoHabilitado={habilitado}
         centralizado
-        tamanhoTexto="1.35vw"
-        tamanhoIcone="1.25vw"
+        {...ESCADA.navegacao}
       />
     </div>
   );

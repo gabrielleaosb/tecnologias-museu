@@ -5,4 +5,10 @@ export const coresAdmin = {
   botaoAcao: "#FFCE76",
   botaoSecundario: "#6C757C",
   texto: "#FFFFFF",
+
+  // Tela de login — amostrados de design/escada/LoginADM.jpeg
+  cardLogin: "#FFFFFF",
+  botaoLogin: "#007BFF",
+  textoLogin: "#333333",
+  bordaCampo: "#CED4DA",
 } as const;
