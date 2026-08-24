@@ -27,6 +27,28 @@ export function d(px: number): string {
 }
 
 /**
+ * Centro horizontal da área livre de um dos lados do painel central, medido na
+ * **janela** e não no canvas.
+ *
+ * O canvas mantém 16:9 e é centralizado, então em monitores de outro formato sobra
+ * uma faixa nas laterais — pintada com a cor da tela, o que a torna indistinguível
+ * do fundo. Para quem olha, o amarelo da tela de novo jogo vai de borda a borda; um
+ * elemento centralizado nos 596px de canvas à esquerda do painel aparece deslocado
+ * para dentro, porque metade da área que ele deveria dividir está fora do canvas.
+ *
+ * A largura dessa sobra depende do formato do monitor, então não existe coordenada
+ * fixa que resolva: a conta precisa misturar `vw` (a janela) com `--u` (o canvas).
+ * Em 16:9 as duas coincidem e o resultado volta a ser o centro do canvas.
+ *
+ * @param bordaDoPainel coordenada de projeto da borda do painel que limita a faixa
+ */
+export function centroDaFaixa(lado: "esquerda" | "direita", bordaDoPainel: number): string {
+  const fator = (25 + bordaDoPainel / (PX_POR_UNIDADE * 2)).toFixed(2);
+  const sinal = lado === "esquerda" ? "-" : "";
+  return `calc(${sinal}25vw + var(--u) * ${fator})`;
+}
+
+/**
  * Entreletra. O PDF usa três níveis bem definidos, medidos comparando a largura de
  * cada trecho com a largura natural da mesma string na fonte real (Futura PT dos
  * arquivos em public/fonts) — 27 dos 29 trechos medidos caem dentro de 0,19–0,20em

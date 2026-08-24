@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { coresSala6 } from "@/lib/sala6/cores";
-import { d, PESO, TRACKING } from "@/lib/sala6/medidas";
+import { centroDaFaixa, d, PESO, TRACKING } from "@/lib/sala6/medidas";
 import { DIFICULDADES, ORDEM_DIFICULDADES, type Dificuldade } from "@/lib/sala6/dificuldades";
 import { Casa } from "@/components/sala6/Casa";
 import { LogoSala6 } from "@/components/sala6/LogoSala6";
@@ -89,10 +89,18 @@ export function TelaNovoJogo({
     <div className="relative h-full w-full" style={{ backgroundColor: coresSala6.ocre }}>
       <Casa variante="sairMarrom" x={66} y={66} onClick={onSair} rotuloAcessivel="Sair" />
 
-      {/* Marca lateral esquerda e logo à direita, ambas rebaixadas sobre o ocre. */}
+      {/*
+        Marca lateral e logo, ambas rebaixadas sobre o ocre e centralizadas na faixa
+        amarela **visível** — que é maior que a faixa dentro do canvas, porque a sobra
+        das bordas tem a mesma cor. Ver `centroDaFaixa`.
+      */}
       <div
-        className="absolute"
-        style={{ left: d(105), top: d(365), opacity: coresSala6.marcaDagua }}
+        className="absolute -translate-x-1/2"
+        style={{
+          left: centroDaFaixa("esquerda", painel.esquerda),
+          top: d(365),
+          opacity: coresSala6.marcaDagua,
+        }}
       >
         <p
           style={{
@@ -123,9 +131,11 @@ export function TelaNovoJogo({
         </p>
       </div>
 
+      {/* Fundo amarelo: variante escura. */}
       <LogoSala6
-        variante="marrom"
-        x={1506}
+        variante="escura"
+        x={centroDaFaixa("direita", painel.esquerda + painel.largura)}
+        centralizar
         y={284}
         largura={283}
         opacidade={coresSala6.marcaDagua}

@@ -1,15 +1,16 @@
 import type { ReactNode } from "react";
 import { coresSala6 } from "@/lib/sala6/cores";
-import { d, medidasSala6, PESO, TRACKING } from "@/lib/sala6/medidas";
+import { centroDaFaixa, d, medidasSala6, PESO, TRACKING } from "@/lib/sala6/medidas";
 import { Botao } from "@/components/sala6/Botao";
 import { Casa, type VarianteCasa } from "@/components/sala6/Casa";
-import { LogoSala6 } from "@/components/sala6/LogoSala6";
+import { LogoSala6, type VarianteLogo } from "@/components/sala6/LogoSala6";
 
 const { cartao } = medidasSala6;
 
 interface TelaDialogoProps {
   fundo: string;
-  logo: "bege" | "marrom";
+  /** Segue o fundo do diálogo: escuro pede a clara, amarelo pede a escura. */
+  logo: VarianteLogo;
   titulo: string;
   subtitulo?: string;
   children: ReactNode;
@@ -33,7 +34,18 @@ export function TelaDialogo({
 }: TelaDialogoProps) {
   return (
     <div className="relative h-full w-full" style={{ backgroundColor: fundo }}>
-      <LogoSala6 variante={logo} x={132} y={350} largura={363} opacidade={0.3} />
+      {/*
+        Centralizada na faixa visível à esquerda do cartão, e não nos 596px de canvas:
+        a sobra das bordas tem a cor do fundo e conta como área. Ver `centroDaFaixa`.
+      */}
+      <LogoSala6
+        variante={logo}
+        x={centroDaFaixa("esquerda", cartao.x)}
+        centralizar
+        y={350}
+        largura={363}
+        opacidade={0.3}
+      />
 
       <div
         className="absolute"

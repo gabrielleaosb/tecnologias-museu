@@ -55,11 +55,8 @@ export function TelaRanking({ ranking, destaque, onSair }: TelaRankingProps) {
     <div className="relative h-full w-full" style={{ backgroundColor: coresSala6.bege }}>
       <Casa variante="sairMarrom" x={73} y={61} onClick={onSair} rotuloAcessivel="Sair" />
 
-      {/*
-        No PDF esta logo é a variante horizontal, que não veio junto com os assets.
-        Fica a vertical, alinhada pela mesma borda direita, até a horizontal chegar.
-      */}
-      <LogoSala6 variante="marrom" x={1680} y={40} largura={111} opacidade={0.45} />
+      {/* A horizontal, como no PDF: o cabeçalho desta tela é baixo e largo. */}
+      <LogoSala6 variante="horizontal" x={1521} y={74} largura={270} />
 
       <h1
         className="pointer-events-none absolute w-full text-center"

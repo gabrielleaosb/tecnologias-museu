@@ -222,7 +222,7 @@ export default function Sala6Page() {
         {etapa === "jogando" && ganhou && (
           <TelaDialogo
             fundo={coresSala6.ocre}
-            logo="marrom"
+            logo="escura"
             titulo="VOCÊ VENCEU!"
             subtitulo="VEJA SUA COLOCAÇÃO"
             casa={{ variante: "sairMarrom", x: 927, y: 722, rotulo: "Sair", onClick: irParaMenu }}
@@ -236,7 +236,7 @@ export default function Sala6Page() {
         {etapa === "jogando" && perdeu && (
           <TelaDialogo
             fundo={coresSala6.marromEscuro}
-            logo="bege"
+            logo="clara"
             titulo="VOCÊ PERDEU"
             subtitulo="TENTE NOVAMENTE"
             casa={{ variante: "menuMarrom", x: 922, y: 734, rotulo: "Menu", onClick: irParaMenu }}
@@ -248,7 +248,7 @@ export default function Sala6Page() {
         )}
 
         {etapa === "recomecar" && (
-          <TelaDialogo fundo={coresSala6.marrom} logo="bege" titulo="RECOMEÇAR?">
+          <TelaDialogo fundo={coresSala6.marrom} logo="clara" titulo="RECOMEÇAR?">
             <BotaoDialogo y={469} fundo={coresSala6.ocre} onClick={() => setEtapa("novo-jogo")}>
               NOVO JOGO
             </BotaoDialogo>
