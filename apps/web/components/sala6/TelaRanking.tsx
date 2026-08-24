@@ -62,7 +62,7 @@ export function TelaRanking({ ranking, destaque, onSair }: TelaRankingProps) {
       <LogoSala6 variante="marrom" x={1680} y={40} largura={111} opacidade={0.45} />
 
       <h1
-        className="absolute w-full text-center"
+        className="pointer-events-none absolute w-full text-center"
         style={{
           top: d(58),
           color: coresSala6.rotulo,
@@ -76,7 +76,7 @@ export function TelaRanking({ ranking, destaque, onSair }: TelaRankingProps) {
         JOGO DA MEMÓRIA
       </h1>
       <p
-        className="absolute w-full text-center"
+        className="pointer-events-none absolute w-full text-center"
         style={{
           top: d(143),
           color: coresSala6.rotulo,

@@ -116,7 +116,7 @@ export function TelaAutorizacao({
       </h1>
 
       <p
-        className="absolute w-full text-center font-medium"
+        className="pointer-events-none absolute w-full text-center font-medium"
         style={{
           top: XD.chamada.topo,
           color: cores.textoEscuro,

@@ -37,13 +37,22 @@ interface TelaTextoProps {
   tipo: "video" | "foto";
   texto: string;
   onTextoChange: (v: string) => void;
+  onAnterior: () => void;
   onProximo: () => void;
   enviando: boolean;
   /** Mensagem de falha no envio; mantém o visitante na tela para tentar de novo. */
   erro?: string | null;
 }
 
-export function TelaTexto({ tipo, texto, onTextoChange, onProximo, enviando, erro }: TelaTextoProps) {
+export function TelaTexto({
+  tipo,
+  texto,
+  onTextoChange,
+  onAnterior,
+  onProximo,
+  enviando,
+  erro,
+}: TelaTextoProps) {
   return (
     <div className="relative h-screen w-screen" style={ESCADA.tela}>
       {/*
@@ -60,7 +69,7 @@ export function TelaTexto({ tipo, texto, onTextoChange, onProximo, enviando, err
         // `inset-x-0`, e não `w-full`: sem `left` definido, um elemento absoluto
         // fica na posição estática — deslocada pelo padding de 2,5vw da moldura —
         // enquanto a largura cobre a caixa toda, o que jogava o centro 48px à direita.
-        className="absolute inset-x-0 text-center"
+        className="pointer-events-none absolute inset-x-0 text-center"
         style={{ ...ESCADA.texto.titulo, top: XD.titulo.topo, fontSize: XD.titulo.texto, lineHeight: XD.titulo.altura }}
       >
         <span className="block font-bold">Para complementar {tipo === "video" ? "o vídeo" : "a foto"},</span>
@@ -109,13 +118,47 @@ export function TelaTexto({ tipo, texto, onTextoChange, onProximo, enviando, err
 
       {erro && (
         <p
-          className="absolute inset-x-0 text-center font-bold"
+          className="pointer-events-none absolute inset-x-0 text-center font-bold"
           style={{ top: "66vh", color: "#B3261E", fontSize: ESCADA.texto.rotulo.fontSize }}
           role="alert"
         >
           {erro}
         </p>
       )}
+
+      {/*
+        ANTERIOR volta para a revisão da mídia. Não está no PDF, mas sem ele quem se
+        arrepende da foto ou do vídeo depois de confirmar não tem como refazer: o
+        único caminho seria abandonar o depoimento e recomeçar do zero.
+
+        Fica espelhando o PRÓXIMO, na mesma altura, e não no meio da lateral como nas
+        telas de formulário — ali ele passaria por cima da caixa de texto, que é larga.
+      */}
+      <button
+        onClick={onAnterior}
+        disabled={enviando}
+        className="absolute flex cursor-pointer items-center disabled:opacity-40"
+        style={{
+          left: ESCADA.navegacao.recuo,
+          top: XD.proximo.topo,
+          gap: ESCADA.navegacao.espaco,
+        }}
+      >
+        <Image
+          src="/icons/escada/seta2.png"
+          alt=""
+          width={401}
+          height={401}
+          style={{
+            width: XD.proximo.icone,
+            height: XD.proximo.icone,
+            transform: "scaleX(-1)",
+          }}
+        />
+        <span className="font-bold" style={{ color: cores.textoEscuro, fontSize: XD.proximo.texto }}>
+          ANTERIOR
+        </span>
+      </button>
 
       {/* No PDF o PRÓXIMO desta tela fica no alto à direita, e não no meio da lateral. */}
       <button

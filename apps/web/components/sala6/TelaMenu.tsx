@@ -24,7 +24,7 @@ export function TelaMenu({ onNovoJogo, onRanking, onVoltar }: TelaMenuProps) {
       <LogoSala6 variante="marrom" x={1672} y={72} largura={166} />
 
       <h1
-        className="absolute w-full text-center"
+        className="pointer-events-none absolute w-full text-center"
         style={{
           top: d(109),
           color: coresSala6.bege,
@@ -38,7 +38,7 @@ export function TelaMenu({ onNovoJogo, onRanking, onVoltar }: TelaMenuProps) {
       </h1>
 
       <p
-        className="absolute w-full text-center"
+        className="pointer-events-none absolute w-full text-center"
         style={{
           top: d(235),
           color: coresSala6.bege,

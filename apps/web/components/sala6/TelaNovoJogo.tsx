@@ -28,6 +28,9 @@ const campo = {
   recuo: 64,
 } as const;
 
+/** Painel bege central. Também delimita os rótulos, que antes iam de ponta a ponta. */
+const painel = { esquerda: 596, largura: 728 } as const;
+
 /** Página 2 do PDF. */
 export function TelaNovoJogo({
   nome,
@@ -65,7 +68,15 @@ export function TelaNovoJogo({
 
   const estiloRotulo = {
     position: "absolute",
-    width: "100%",
+    /**
+     * Limitado ao painel, e não à largura da tela.
+     *
+     * Com `width: 100%` o rótulo virava uma faixa invisível de ponta a ponta: cobria
+     * a parte de baixo do botão SAIR, que deixava de responder ali, e ainda fazia um
+     * toque em qualquer lugar daquela altura focar o campo de nome.
+     */
+    left: d(painel.esquerda),
+    width: d(painel.largura),
     color: coresSala6.rotulo,
     fontSize: d(31.1),
     fontWeight: PESO.demi,
@@ -130,16 +141,16 @@ export function TelaNovoJogo({
       <div
         className="absolute"
         style={{
-          left: d(596),
+          left: d(painel.esquerda),
           top: 0,
-          width: d(728),
+          width: d(painel.largura),
           height: "100%",
           backgroundColor: coresSala6.bege,
         }}
       />
 
       <h1
-        className="absolute w-full text-center"
+        className="pointer-events-none absolute w-full text-center"
         style={{
           top: d(71),
           color: coresSala6.marrom,

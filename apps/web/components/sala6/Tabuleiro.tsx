@@ -36,7 +36,7 @@ export function Tabuleiro({ estado, segundosRestantes, onVirar, onSair }: Tabule
       />
 
       <h1
-        className="absolute w-full text-center"
+        className="pointer-events-none absolute w-full text-center"
         style={{
           top: d(cabecalhoJogo.titulo.y),
           color: config.tinta,

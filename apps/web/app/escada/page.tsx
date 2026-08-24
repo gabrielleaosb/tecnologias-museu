@@ -262,6 +262,10 @@ export default function EscadaPage() {
             tipo={dados.tipo}
             texto={dados.texto}
             onTextoChange={(texto) => setDados((d) => ({ ...d, texto }))}
+            // Volta para a revisão da mídia, que segue guardada em `dados`. O texto
+            // já escrito também se mantém, então voltar não custa nada a quem só
+            // quer conferir a foto de novo.
+            onAnterior={() => setPasso("preview")}
             onProximo={confirmarDepoimento}
             enviando={enviando}
             erro={erroEnvio}

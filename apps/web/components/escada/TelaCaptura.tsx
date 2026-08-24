@@ -325,7 +325,7 @@ export function TelaCaptura({ tipo, onCapturado, onAnterior }: TelaCapturaProps)
 
       {erro && (
         <p
-          className="absolute w-full text-center font-bold"
+          className="pointer-events-none absolute w-full text-center font-bold"
           style={{ top: "92vh", color: "#B3261E", fontSize: ESCADA.texto.rotulo.fontSize }}
           role="alert"
         >
