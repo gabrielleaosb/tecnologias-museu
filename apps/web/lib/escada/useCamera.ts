@@ -9,6 +9,7 @@ export function useCamera(tipo: "foto" | "video") {
   const gravadorRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const intervaloRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const contagemRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const [streamPronto, setStreamPronto] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
@@ -22,7 +23,16 @@ export function useCamera(tipo: "foto" | "video") {
     let cancelado = false;
 
     navigator.mediaDevices
-      .getUserMedia({ video: true, audio: tipo === "video" })
+      /**
+       * Pede 1280×720. Com `video: true` puro a câmera entrega o padrão dela, que
+       * costuma ser 640×480 — pouco para uma foto que vai ser exibida na TV de 43"
+       * da Sala 7. `ideal` não é exigência: se a webcam não alcançar, ela entrega o
+       * que puder em vez de falhar.
+       */
+      .getUserMedia({
+        video: { width: { ideal: 1280 }, height: { ideal: 720 } },
+        audio: tipo === "video",
+      })
       .then((stream) => {
         if (cancelado) {
           stream.getTracks().forEach((t) => t.stop());
@@ -38,6 +48,7 @@ export function useCamera(tipo: "foto" | "video") {
       cancelado = true;
       streamRef.current?.getTracks().forEach((t) => t.stop());
       if (intervaloRef.current) clearInterval(intervaloRef.current);
+      if (contagemRef.current) clearInterval(contagemRef.current);
     };
   }, [tipo]);
 
@@ -47,6 +58,12 @@ export function useCamera(tipo: "foto" | "video") {
       intervaloRef.current = null;
     }
   };
+
+  const pararGravacao = useCallback(() => {
+    limparIntervalo();
+    setGravando(false);
+    gravadorRef.current?.stop();
+  }, []);
 
   const iniciarGravacaoReal = useCallback(() => {
     const stream = streamRef.current;
@@ -74,38 +91,53 @@ export function useCamera(tipo: "foto" | "video") {
 
     setGravando(true);
     setSegundos(0);
+
+    // O tempo decorrido é contado numa variável do fechamento, e o `setSegundos`
+    // recebe um valor pronto. Antes o incremento e a parada automática moravam
+    // dentro do atualizador de estado — e o React chama atualizadores duas vezes em
+    // desenvolvimento, para detectar impureza, o que disparava a parada em duplicidade.
+    let decorridos = 0;
     intervaloRef.current = setInterval(() => {
-      setSegundos((atual) => {
-        if (atual + 1 >= DURACAO_MAXIMA_VIDEO_S) {
-          pararGravacao();
-          return atual + 1;
-        }
-        return atual + 1;
-      });
+      decorridos += 1;
+      setSegundos(decorridos);
+      if (decorridos >= DURACAO_MAXIMA_VIDEO_S) pararGravacao();
     }, 1000);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const iniciarGravacao = useCallback(() => {
-    setContagemRegressiva(CONTAGEM_REGRESSIVA_S);
-    const contagem = setInterval(() => {
-      setContagemRegressiva((atual) => {
-        if (atual === null) return null;
-        if (atual <= 1) {
-          clearInterval(contagem);
-          iniciarGravacaoReal();
-          return null;
-        }
-        return atual - 1;
-      });
+    // Já em contagem ou já gravando: ignora. Sem esta guarda, um toque duplo no
+    // GRAVAR abria duas contagens e, no fim delas, dois cronômetros.
+    if (contagemRef.current || intervaloRef.current) return;
+
+    /**
+     * A contagem vive numa variável do fechamento, e não dentro do atualizador de
+     * estado.
+     *
+     * Era daqui que vinha o cronômetro correndo de dois em dois e mais rápido que um
+     * segundo: `clearInterval` e o início da gravação estavam dentro do atualizador
+     * de `setContagemRegressiva`, e o React executa atualizadores duas vezes em
+     * desenvolvimento para checar se são puros. A gravação começava duas vezes, cada
+     * uma com seu próprio intervalo de 1s, e os dois somavam no mesmo contador.
+     */
+    let restante = CONTAGEM_REGRESSIVA_S;
+    setContagemRegressiva(restante);
+
+    contagemRef.current = setInterval(() => {
+      restante -= 1;
+      if (restante > 0) {
+        setContagemRegressiva(restante);
+        return;
+      }
+      if (contagemRef.current) {
+        clearInterval(contagemRef.current);
+        contagemRef.current = null;
+      }
+      setContagemRegressiva(null);
+      iniciarGravacaoReal();
     }, 1000);
   }, [iniciarGravacaoReal]);
 
-  const pararGravacao = useCallback(() => {
-    limparIntervalo();
-    setGravando(false);
-    gravadorRef.current?.stop();
-  }, []);
 
   const tirarFotoReal = useCallback(() => {
     const video = videoRef.current;
@@ -125,17 +157,26 @@ export function useCamera(tipo: "foto" | "video") {
   }, []);
 
   const tirarFoto = useCallback(() => {
-    setContagemRegressiva(CONTAGEM_REGRESSIVA_S);
-    const contagem = setInterval(() => {
-      setContagemRegressiva((atual) => {
-        if (atual === null) return null;
-        if (atual <= 1) {
-          clearInterval(contagem);
-          tirarFotoReal();
-          return null;
-        }
-        return atual - 1;
-      });
+    // Mesma correção da gravação: a contagem vive no fechamento e o disparo fica
+    // fora do atualizador de estado, que o React executa duas vezes em
+    // desenvolvimento — o que fazia a foto ser tirada em duplicidade.
+    if (contagemRef.current) return;
+
+    let restante = CONTAGEM_REGRESSIVA_S;
+    setContagemRegressiva(restante);
+
+    contagemRef.current = setInterval(() => {
+      restante -= 1;
+      if (restante > 0) {
+        setContagemRegressiva(restante);
+        return;
+      }
+      if (contagemRef.current) {
+        clearInterval(contagemRef.current);
+        contagemRef.current = null;
+      }
+      setContagemRegressiva(null);
+      tirarFotoReal();
     }, 1000);
   }, [tirarFotoReal]);
 

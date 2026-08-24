@@ -9,7 +9,12 @@ export function TelaBoasVindas({ onDeixarDepoimento }: { onDeixarDepoimento: () 
       className="flex h-screen w-screen flex-col items-center justify-center gap-[2.6vh] px-8 text-center"
       style={{ backgroundColor: cores.fundoEscuro }}
     >
-      <Logo variante="clara" />
+      {/*
+        56% maior que o padrão de 16,67vw do componente, só nesta tela.
+        O deslocamento é `relative`, e não margem: assim a logo sobe sem tirar do
+        lugar o título, a caixa de texto e o botão, que seguem centralizados.
+      */}
+      <Logo variante="clara" style={{ width: "26vw", position: "relative", top: "-4vh" }} />
 
       <h1 className="text-[2.29vw] tracking-widest text-white text-center leading-snug">
         <span className="block whitespace-nowrap">
