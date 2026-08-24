@@ -131,16 +131,16 @@ export function TelaTexto({
         arrepende da foto ou do vídeo depois de confirmar não tem como refazer: o
         único caminho seria abandonar o depoimento e recomeçar do zero.
 
-        Fica espelhando o PRÓXIMO, na mesma altura, e não no meio da lateral como nas
-        telas de formulário — ali ele passaria por cima da caixa de texto, que é larga.
+        Fica no meio da lateral esquerda, como nas telas de formulário. Cabe ali
+        porque a caixa de texto começa em 19,74vw — sobra a faixa da esquerda inteira.
       */}
       <button
         onClick={onAnterior}
         disabled={enviando}
-        className="absolute flex cursor-pointer items-center disabled:opacity-40"
+        className="absolute flex -translate-y-1/2 cursor-pointer items-center disabled:opacity-40"
         style={{
           left: ESCADA.navegacao.recuo,
-          top: XD.proximo.topo,
+          top: "50%",
           gap: ESCADA.navegacao.espaco,
         }}
       >
