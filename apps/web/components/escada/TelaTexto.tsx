@@ -46,12 +46,21 @@ interface TelaTextoProps {
 export function TelaTexto({ tipo, texto, onTextoChange, onProximo, enviando, erro }: TelaTextoProps) {
   return (
     <div className="relative h-screen w-screen" style={ESCADA.tela}>
-      <div style={ESCADA.logo.posicao}>
-        <Logo variante="escura1-vertical" style={{ width: ESCADA.logo.largura }} />
-      </div>
+      {/*
+        Logo horizontal, no mesmo lugar e tamanho da captura e da preview. Esta tela
+        vem logo depois delas, e a vertical fazia a marca saltar de posição e de
+        formato bem no meio da sequência.
+      */}
+      <Logo
+        variante="escura"
+        style={{ position: "absolute", left: "4.53vw", top: "5.46vh", width: "17.29vw" }}
+      />
 
       <h1
-        className="absolute w-full text-center"
+        // `inset-x-0`, e não `w-full`: sem `left` definido, um elemento absoluto
+        // fica na posição estática — deslocada pelo padding de 2,5vw da moldura —
+        // enquanto a largura cobre a caixa toda, o que jogava o centro 48px à direita.
+        className="absolute inset-x-0 text-center"
         style={{ ...ESCADA.texto.titulo, top: XD.titulo.topo, fontSize: XD.titulo.texto, lineHeight: XD.titulo.altura }}
       >
         <span className="block font-bold">Para complementar {tipo === "video" ? "o vídeo" : "a foto"},</span>
@@ -100,7 +109,7 @@ export function TelaTexto({ tipo, texto, onTextoChange, onProximo, enviando, err
 
       {erro && (
         <p
-          className="absolute w-full text-center font-bold"
+          className="absolute inset-x-0 text-center font-bold"
           style={{ top: "66vh", color: "#B3261E", fontSize: ESCADA.texto.rotulo.fontSize }}
           role="alert"
         >

@@ -15,12 +15,26 @@ import { Logo } from "@/components/escada/Logo";
 const XD = {
   logo: { esquerda: "4.53vw", topo: "5.46vh", largura: "17.29vw" },
   midia: { esquerda: "3.9vw", topo: "24.63vh", largura: "51.04vw", proporcao: "16 / 9" },
-  /** Ícone de expandir, no canto superior direito da mídia. */
+  /**
+   * As duas referências divergem aqui, e cada uma tem sua razão:
+   * na foto (`telapos.jpeg`) há um ícone de expandir no canto, discreto, porque a
+   * imagem já se vê inteira; no vídeo (`telaposvideo.jpeg`) há um botão de play
+   * grande no centro com o rótulo ASSISTIR, porque ali a ação principal é tocar.
+   */
   expandir: { recuo: "1.77vw", tamanho: "2.92vw" },
+  /**
+   * `recuoRotulo` é negativo porque `play.png` tem margem transparente própria:
+   * o círculo ocupa ~89% do quadro, então sobra um vão invisível abaixo dele que se
+   * somava ao espaçamento e afastava o rótulo. O valor cancela essa margem.
+   */
+  assistir: { circulo: "10vw", recuoRotulo: "-0.7vw", texto: "1.46vw" },
   /** Bloco de texto: centralizado em x=1506, começando em y=225. */
   texto: { esquerda: "60.18vw", largura: "36.46vw", topo: "20.83vh", corpo: "2.26vw", altura: 1.27 },
-  /** Lista de ações: alinhada à esquerda em x=1279, uma linha a cada 95px. */
-  acoes: { esquerda: "66.61vw", topo: "62.5vh", passo: "8.8vh", icone: "2.34vw", espaco: "1.4vw" },
+  /**
+   * Lista de ações: uma linha a cada 95px, centralizada sob o bloco de texto.
+   * Sobe 40px em relação à referência (675 → 635), para encostar mais no parágrafo.
+   */
+  acoes: { topo: "58.8vh", passo: "8.8vh", icone: "2.34vw", espaco: "1.4vw" },
 } as const;
 
 interface TelaPreviewProps {
@@ -123,30 +137,53 @@ export function TelaPreview({ tipo, midiaUrl, onConfirmar, onRegravar, onCancela
           <img src={midiaUrl} alt="Foto capturada" className="h-full w-full object-cover" />
         )}
 
-        {/*
-          Ícone de expandir no canto da mídia, como na referência — é ele que abre a
-          tela cheia, onde o vídeo toca com controles. Não veio como asset, então é
-          desenhado aqui, e ganha um contorno escuro para não sumir sobre uma foto clara.
-        */}
-        <svg
-          viewBox="0 0 24 24"
-          aria-hidden
-          className="absolute"
-          style={{
-            right: XD.expandir.recuo,
-            top: XD.expandir.recuo,
-            width: XD.expandir.tamanho,
-            height: XD.expandir.tamanho,
-            fill: "none",
-            stroke: "#FFFFFF",
-            strokeWidth: 2,
-            strokeLinecap: "round",
-            strokeLinejoin: "round",
-            filter: "drop-shadow(0 0 2px rgba(0,0,0,0.6))",
-          }}
-        >
-          <path d="M9 3H3v6M15 3h6v6M9 21H3v-6M15 21h6v-6" />
-        </svg>
+        {tipo === "video" ? (
+          <span className="absolute inset-0 flex flex-col items-center justify-center">
+            {/* `play.png` já é o botão inteiro: círculo bege com o triângulo dentro. */}
+            <Image
+              src="/icons/escada/play.png"
+              alt=""
+              width={401}
+              height={401}
+              style={{ width: XD.assistir.circulo, height: XD.assistir.circulo }}
+            />
+            <span
+              className="font-medium text-white"
+              style={{
+                marginTop: XD.assistir.recuoRotulo,
+                fontSize: XD.assistir.texto,
+                letterSpacing: "0.1em",
+              }}
+            >
+              ASSISTIR
+            </span>
+          </span>
+        ) : (
+          /*
+            Ícone de expandir, só na foto. Não veio como asset, então é desenhado
+            aqui, com contorno escuro para não sumir sobre uma foto clara — que é o
+            caso comum, gente de roupa clara sob a luz da cabine.
+          */
+          <svg
+            viewBox="0 0 24 24"
+            aria-hidden
+            className="absolute"
+            style={{
+              right: XD.expandir.recuo,
+              top: XD.expandir.recuo,
+              width: XD.expandir.tamanho,
+              height: XD.expandir.tamanho,
+              fill: "none",
+              stroke: "#FFFFFF",
+              strokeWidth: 2,
+              strokeLinecap: "round",
+              strokeLinejoin: "round",
+              filter: "drop-shadow(0 0 2px rgba(0,0,0,0.6))",
+            }}
+          >
+            <path d="M9 3H3v6M15 3h6v6M9 21H3v-6M15 21h6v-6" />
+          </svg>
+        )}
       </button>
 
       {/* Título e parágrafo num bloco centralizado só, como na referência. */}
@@ -178,7 +215,19 @@ export function TelaPreview({ tipo, midiaUrl, onConfirmar, onRegravar, onCancela
         </p>
       </div>
 
-      <div className="absolute" style={{ left: XD.acoes.esquerda, top: XD.acoes.topo }}>
+      {/*
+        Duas camadas de propósito: a de fora ocupa a mesma faixa do bloco de texto e
+        centraliza; a de dentro se ajusta ao conteúdo e alinha as linhas à esquerda.
+        Assim o grupo fica centralizado em relação ao texto de cima, mas os três
+        ícones continuam alinhados entre si — o que não aconteceria se cada linha
+        fosse centralizada por conta própria, já que os rótulos têm larguras bem
+        diferentes ("CANCELAR" contra "TIRAR OUTRA FOTO").
+      */}
+      <div
+        className="absolute flex justify-center"
+        style={{ left: XD.texto.esquerda, width: XD.texto.largura, top: XD.acoes.topo }}
+      >
+        <div className="flex flex-col items-start">
         {[
           { icone: "/icons/escada/confirmar.png", label: "CONFIRMAR", onClick: onConfirmar },
           {
@@ -210,6 +259,7 @@ export function TelaPreview({ tipo, midiaUrl, onConfirmar, onRegravar, onCancela
             </span>
           </button>
         ))}
+        </div>
       </div>
 
       {confirmandoCancelamento && (
