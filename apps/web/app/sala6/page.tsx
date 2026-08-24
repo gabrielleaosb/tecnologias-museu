@@ -47,6 +47,27 @@ export default function Sala6Page() {
   const perdeu = partida !== null && !ganhou && partida.restante <= 0;
   const emJogo = etapa === "jogando" && partida !== null && !ganhou && !perdeu;
 
+  /**
+   * Fundo da faixa que sobra quando o monitor não é 16:9.
+   *
+   * O canvas mantém a proporção fixa — sem isso as cartas deixariam de ser quadradas
+   * e a grade sairia do lugar em relação ao cabeçalho —, então em telas de outro
+   * formato aparece uma sobra nas laterais ou acima e abaixo. Pintá-la com a cor da
+   * tela em exibição faz a emenda desaparecer, em vez de emoldurar o jogo. Cada tela
+   * tem seu próprio fundo, daí o mapeamento seguir o mesmo caminho da renderização
+   * lá embaixo — inclusive na ordem, já que "jogando" pode estar mostrando o
+   * tabuleiro ou um dos diálogos de fim de partida.
+   */
+  const fundoDaTela = (() => {
+    if (etapa === "menu" || etapa === "recomecar") return coresSala6.marrom;
+    if (etapa === "novo-jogo") return coresSala6.ocre;
+    if (etapa === "ranking") return coresSala6.bege;
+    if (ganhou) return coresSala6.ocre;
+    if (perdeu) return coresSala6.marromEscuro;
+    if (partida) return DIFICULDADES[partida.jogo.dificuldade].mesa;
+    return coresSala6.marrom;
+  })();
+
   // Relógio da partida. Depende de `emJogo`, um booleano, e não de `partida`: se
   // dependesse do objeto, cada tique recriaria o intervalo e o relógio andaria fora
   // de compasso.
@@ -152,7 +173,7 @@ export default function Sala6Page() {
       style={
         {
           "--u": UNIDADE_SALA6,
-          backgroundColor: coresSala6.marromEscuro,
+          backgroundColor: fundoDaTela,
           // A sala roda em monitor touch. Sem isto o navegador segura cada toque
           // esperando para ver se vira um duplo-toque de zoom, e o jogo inteiro
           // responde com atraso — o que num jogo contra o relógio é injusto.

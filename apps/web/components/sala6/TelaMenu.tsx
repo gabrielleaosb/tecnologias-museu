@@ -15,7 +15,13 @@ export function TelaMenu({ onNovoJogo, onRanking, onVoltar }: TelaMenuProps) {
   return (
     <div className="relative h-full w-full" style={{ backgroundColor: coresSala6.marrom }}>
       <Casa variante="voltarBege" x={94} y={79} onClick={onVoltar} rotuloAcessivel="Voltar" />
-      <LogoSala6 variante="bege" x={1672} y={72} largura={166} opacidade={0.45} />
+      {/*
+        Marrom em opacidade cheia. A bege que estava aqui aparecia a 45%, mas o mesmo
+        rebaixamento aplicado à marrom a apagava contra o fundo escuro — os dois tons
+        ficam próximos demais. Sendo a marrom, ela precisa da opacidade inteira para
+        se ler.
+      */}
+      <LogoSala6 variante="marrom" x={1672} y={72} largura={166} />
 
       <h1
         className="absolute w-full text-center"
