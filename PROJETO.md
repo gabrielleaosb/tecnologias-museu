@@ -2,7 +2,7 @@
 
 ## Visão Geral
 
-Sistema interativo para o Museu do Sertão de Piranhas, Alagoas. Composto por 3 sistemas independentes (com exceção de uma dependência entre Escada e Sala 7) entregues como um único app web rodando localmente nos dispositivos do museu.
+Sistema interativo para o Museu do Sertão de Piranhas, Alagoas. Composto por 4 sistemas independentes (com exceção de uma dependência entre Escada e Sala 7) entregues como um único app web rodando localmente nos dispositivos do museu.
 
 **Desenvolvedor:** Gabriel (solo) + Claude  
 **Data de inauguração:** Setembro de 2026 (provável segunda quinzena, data não confirmada)  
@@ -12,7 +12,7 @@ Sistema interativo para o Museu do Sertão de Piranhas, Alagoas. Composto por 3 
 
 ---
 
-## Os 3 Sistemas
+## Os 4 Sistemas
 
 ### 1. Sala 1 — Kiosk Interativo com Maquete
 
@@ -68,11 +68,11 @@ Cabine cenográfica embaixo da escada. Tablet + webcam. Visitante registra um de
 
 **✅ Status de fidelidade visual (2026-07-13):** passada de fidelidade visual feita a partir dos 3 PDFs do protótipo (Adobe XD exportado). Corrigido um bug estrutural que afetava todo o app: a fonte da marca ("Futura PT", já configurada via `@font-face`) nunca era aplicada — o `body` tinha `font-family: Arial` fixo sobrescrevendo tudo. Cores de todas as telas (Escada, Admin, Sala 7) recalibradas a partir de amostragem de pixel nos PDFs renderizados em alta resolução. Corrigida a tela de Escolha (vídeo/foto) que usava fundo claro por engano — no protótipo ela usa o mesmo fundo escuro da tela de boas-vindas. Adicionado o logo (que estava faltando) em 6 das telas do fluxo. Sala 7: nome do visitante agora sobreposto na foto/vídeo (como no protótipo), painel de filtro virou card flutuante. Escada e Sala 7 validados visualmente (navegador vs. PDF) e ficaram muito próximos do protótipo.
 
-**⚠️ Pendente:** Admin (`/admin` e `/admin/login`) ainda não está 100% fiel — a tela de login não tem design de referência no PDF (só a lista de depoimentos foi prototipada) e está com um visual genérico/placeholder; a lista de depoimentos por dentro também precisa de mais uma passada de ajuste fino. Precisa de revisão específica do que está diferente antes da próxima rodada.
+**✅ Admin refeito (2026-08-06):** o Admin (`/admin` e `/admin/login`) foi reconstruído com fidelidade ao protótipo e a Escada foi padronizada junto. Fica registrado que a tela de **login não tem design de referência no PDF** (só a lista de depoimentos foi prototipada), então ela segue um visual derivado do resto do sistema, não do protótipo.
 
 **✅ Adequações pra hardware físico (2026-07-16):** com a definição do hardware real da cabine (webcam USB + monitor touch + mini PC), foram resolvidas 4 lacunas que impediriam o funcionamento em produção:
 1. **HTTPS** — `getUserMedia` (captura de câmera) exige contexto seguro; Caddy agora emite certificado automático via domínio (`DOMAIN` no `.env` da raiz), com `Caddyfile.local` como alternativa self-signed pra testes em rede local sem domínio público. Ver seção "Notas Técnicas" abaixo.
-2. **Teclado virtual em tela** (`components/escada/TecladoVirtual.tsx`) — como o dispositivo é só um monitor touch (sem teclado físico), os campos de nome/e-mail/país/estado/depoimento agora abrem um teclado on-screen embutido no app (funciona independente do SO do mini PC — não depende do teclado virtual nativo do Windows/Linux). `inputMode="none"` nos campos evita que o teclado do SO abra em duplicidade.
+2. **Teclado virtual em tela** — removido em 2026-08-06 (commit `4756a1e`) e **restaurado em 2026-08-24** em `components/TecladoVirtual.tsx`, agora compartilhado entre a Escada e a Sala 6. Ver a seção "Teclado on-screen" abaixo.
 3. **Timeout de inatividade geral** — antes só a tela de agradecimento resetava sozinha (15s). Agora qualquer tela do fluxo (exceto boas-vindas) reseta pra tela inicial após 90s sem toque/tecla, cobrindo o caso de alguém abandonar o preenchimento no meio.
 4. **Guia de operação física** — `OPERACAO-CABINE.md` na raiz do repo documenta o setup do Chromium kiosk (perfil persistente pra permissão de câmera sobreviver a reboots, flags, autostart, checklist de validação em campo).
 
@@ -92,7 +92,51 @@ Cabine cenográfica embaixo da escada. Tablet + webcam. Visitante registra um de
 - `TelaEscolha`: logo `cinza-vertical` (`11.53vw`) com posição ajustada; botão SAIR espelhado horizontalmente em relação à logo; título "ESCOLHA UMA DAS OPÇÕES" posicionado absolutamente na altura do SAIR (Bold 40px, `2.08vw`); círculos dos botões `18.7vw` com ícones vídeo/foto em dimensões proporcionais ao XD; caixa escura `59.58vw × 15.56vh`, texto Futura PT Book 40px letter-spacing 4px. `TopoTela` e `Logo` agora aceitam props `logoStyle` e `sairStyle` para ajustes por tela sem afetar as demais.
 - `TelaInformacoes`: logo `escura1-vertical` alinhada ao mesmo tamanho e posição da TelaEscolha (`11.53vw`, `left: 5.5vw`, `top: calc(2.5vw + 2vh)`).
 
-**⚠️ Próxima alteração planejada:** continuar a passada de fidelidade pixel-a-pixel nas telas restantes do fluxo da Escada — `TelaAutorizacao`, `TelaCaptura`, `TelaPreview`, `TelaOrigem`, `TelaTexto` e `TelaAgradecimento` — aplicando CSS exportado do XD da mesma forma feita em TelaBoasVindas e TelaEscolha.
+**✅ Fidelidade: `TelaOrigem`, `TelaTexto`, `TelaCaptura`, `TelaPreview`, `TelaAgradecimento` (2026-08-06) e `TelaAutorizacao` (2026-08-12)** — medidas aplicadas a partir do XD, mesma abordagem de TelaBoasVindas e TelaEscolha.
+
+**✅ Correção de escala tipográfica (2026-08-24) — a mais significativa desde o início.** Relendo o PDF página a página apareceu que **o texto estava sistematicamente ~40% menor que o protótipo**: o token `texto.corpo` valia 1,35vw (26px) contra os 43,4px do arquivo. O PDF trabalha com três tamanhos e quase nada fora deles, agora refletidos nos tokens de `lib/escada/estilos.ts`:
+
+| No PDF | Token | Onde |
+|---|---|---|
+| 43,4px (2,26vw) | `texto.corpo` | texto corrido de captura, preview e texto |
+| 39,5px (2,06vw) | `texto.titulo` / `texto.secundario` | títulos e chamadas das telas de formulário |
+| 37,7px (1,96vw) | `texto.rotulo` **(novo)** | rótulos de botão e contadores |
+| 36,5px (1,9vw) | `campo.fontSize`, `navegacao.tamanhoTexto` | campos e ANTERIOR/PRÓXIMO |
+
+**Duas telas quebraram com o texto no tamanho certo, e as duas por motivo de largura, não de altura:**
+- **Captura:** os rótulos dos botões estavam usando o tamanho de texto corrido; com 43px o ANTERIOR era empurrado para fora da tela, que não rola. Passaram a `texto.rotulo`, e a faixa central ganhou `min-h-0` para poder encolher em vez de empurrar. **A tela foi refeita depois — ver abaixo.**
+
+**✅ Telas de captura refeitas (2026-08-24), a partir de `design/escada/Telafoto.jpeg` e `Telavideo.jpeg`.** São referências novas, mais recentes que o PDF, e definem um arranjo que a tela não seguia: logo **horizontal** no alto à esquerda, prévia da câmera 16:9 ocupando a metade esquerda, e uma coluna à direita com texto, botões e — no vídeo — cronômetro, barra e legenda.
+
+- Cada peça é posicionada por coordenada. Antes era uma grade de duas colunas centralizada verticalmente, o que fazia prévia e texto flutuarem conforme o tamanho do parágrafo — e o parágrafo muda entre foto e vídeo. É a mesma armadilha da tela de autorização.
+- **Os PNGs dos botões já são os botões inteiros.** `fotografar.png` é o círculo bege com a câmera dentro; `pause.png` é o quadrado arredondado com o quadrado escuro. O código punha o ícone pequeno dentro de um círculo bege feito em CSS — dava um botão dentro do outro. Agora a imagem ocupa o botão todo, sem fundo por baixo.
+- **A largura da coluna de texto é o que define as quebras.** Nas referências o parágrafo tem quatro linhas nas duas telas. Corpo do texto e largura da coluna andam juntos: ao reduzir o texto de 45,5 para 42px, a coluna caiu de 690 para 637 na mesma proporção — sem isso a tela de foto passava para três linhas e o bloco ficava largo e achatado.
+- **FOTO, GRAVAR e PARAR no meio do parágrafo não são negrito** — só caixa-alta. Conferido ampliando as referências: apenas a primeira linha (o título) é bold; as palavras dentro do texto têm o mesmo peso do restante e só parecem mais fortes porque caixa-alta lê mais denso.
+- Título e parágrafo são **um bloco só**: nas referências a primeira linha é a mesma linha em negrito, com o mesmo corpo e a mesma entrelinha — não um título separado com respiro próprio. O bloco começa mais alto no vídeo, que tem uma linha a mais.
+- **Bug de lint resolvido de verdade, não silenciado:** `react-hooks/refs` acusava acesso a ref durante o render em `camera.contagemRegressiva`. O objeto devolvido por `useCamera` carrega um ref (`videoRef`), e ler *qualquer* campo dele no corpo do componente dispara a regra, mesmo em campos que são estado comum. Desestruturar o hook resolve.
+- **Preview:** a grade tinha `maxWidth: 53,33vw`, deixando ~490px por coluna contra os **722px da p.15**. O mesmo parágrafo quebrava em quase o dobro de linhas e os botões CANCELAR e TIRAR OUTRA FOTO saíam pela borda. Largura corrigida para 77,3vw.
+
+**✅ Outras correções da mesma passada:**
+- **O valor digitado nos campos sai em Heavy**, não no Medium do protótipo. É desvio pedido: com valor e placeholder no mesmo peso, não dava para saber o que já tinha sido preenchido. Vale para nome, e-mail e para o país/estado escolhidos; o placeholder segue em Medium.
+- **Respiro entre os campos**: 32px (`607 − 517 − 58` na p.3), contra os 12px que estavam.
+- **Rótulos PAÍS e ESTADO em Demi**, não Bold.
+- **Tela de texto refeita pela p.18/19**, que ela não seguia: título centralizado em três linhas com "(Opcional)" em Book na própria linha; caixa de 1161×305 posicionada; contador em **duas linhas à direita da caixa**, em `#996742` — estava embaixo, pequeno e na cor errada; PRÓXIMO no alto à direita, e não no meio da lateral.
+- **Tela de autorização refeita pelas p.7 e p.8.** Ela era montada em fluxo — ícone, título, chamada e caixa empilhados numa coluna, empurrados por uma margem única calibrada no olho (`espacoAbaixoDoIcone: 29.57vh`). Bastava o nome do visitante mudar de tamanho para o conjunto inteiro escorregar. Agora cada peça sai da coordenada do PDF, o que reproduz as duas metades que o protótipo define: **em cima o ícone e o texto "Nome, falta pouco…"; embaixo a chamada "Clique aqui para permitir o uso." e a caixa "Eu autorizo"**. Conferido no navegador: título em y=362, chamada em 657 e caixa em 356×809 de 1209×99 — os números do arquivo.
+  - Os dois ícones **não começam na mesma altura** no protótipo: o de vídeo mede 156×156 e o de foto 162×131, e o de foto desce 20px para os dois terminarem na mesma linha acima do texto.
+  - A chamada e o texto da caixa são **53,4px**, bem maiores que o resto da tela — é o maior corpo de texto do PDF inteiro.
+  - **O campo de nome não tem limite de tamanho** (a Sala 6 tem, 24 caracteres). Com a linha travada em `nowrap`, um nome comprido empurrava o texto para fora da tela pelos dois lados; agora ele quebra. Testado com 55 caracteres: o título quebra dentro da tela e a caixa não sai do lugar. **Pôr um teto no campo continua sendo o conserto na origem.**
+  - O título é ancorado nas **duas** laterais (`left` e `right`), e não centralizado por `left: 50%`: com um lado só, a largura disponível para um elemento posicionado vira a metade da tela, e a frase quebrava em três linhas mesmo cabendo em duas.
+  - **A bolinha desmarcada ganhou um anel escuro.** No protótipo ela é um disco branco sólido, que sobre o tom claro da caixa lê como *já marcada* — e num termo de uso de imagem não pode restar dúvida sobre o que o visitante consentiu. O estado sempre esteve correto no código (`autorizacaoImagem: false`, com o PRÓXIMO bloqueado); o que enganava era só o desenho.
+  - **A metade de cima sobe 40px** em relação ao protótipo, por `SUBIDA` — no arquivo sobra muito ar entre o ícone e o texto. Ícone e texto sobem juntos, então a distância entre eles não muda; é o único número a mexer para calibrar.
+- **ANTERIOR / PRÓXIMO (`Navegacao.tsx`), nas quatro telas que os usam:**
+  - **As duas setas passaram a ser o mesmo arquivo.** O ANTERIOR usava `voltar1.png` e o PRÓXIMO `seta2.png` — desenhos diferentes, que lado a lado não combinavam. Agora a da esquerda é a mesma seta **espelhada** por `scaleX(-1)`, o que garante peso, espessura e proporção idênticos sem depender de dois arquivos continuarem parecidos.
+  - **Recuo de 100px das bordas.** O PDF os põe a 145px (seta esquerda em x=145, direita terminando em 1775), mas na tela real isso afasta demais os botões do conteúdo; 100px é o meio-termo escolhido, contra os 32px de antes, que os deixavam quase colados no canto. É desvio deliberado do protótipo, e o valor está num token só (`navegacao.recuo`) — mexer nele reposiciona as quatro telas do par **e** o PRÓXIMO da tela de texto de uma vez.
+  - **Seta de 61px, contra os 29px de antes.** Os PNGs são quadrados de 401×401 com a seta ocupando ~80% da altura e ~51% da largura do quadro; numa caixa de 61 ela sai com 31×49, a medida exata do protótipo. **O texto não mudou** — segue em 36,5px.
+  - Vale para as duas formas de posicionamento do componente: o modo centralizado (informações, origem, autorização) e o em fluxo (captura). Conferido nas quatro: 145 e 1775 em todas.
+  - A tela de texto tem PRÓXIMO próprio, menor, e a seta acompanha: 28×43 no PDF, caixa de 54.
+- **Painel de países:** nomes longos vazavam para fora do botão e invadiam o vizinho — "República Democrática do Congo" tem 30 caracteres contra os ~14 que cabiam na coluna. Agora quebram em duas linhas, com altura mínima em vez de fixa. Conferido: **nenhum dos 195 países transborda.**
+
+**⚠️ Próxima alteração planejada:** com todas as telas do fluxo já cobertas, o que resta na Escada não é mais fidelidade e sim **validação no hardware real** — touch, resolução do monitor da cabine, webcam USB e permissão de câmera persistindo entre reboots (checklist em `OPERACAO-CABINE.md`).
 
 ---
 
@@ -131,6 +175,84 @@ Totem com chatbot guiado por menus sobre o tema Cangaço. Não é IA generativa 
 
 ---
 
+### 4. Sala 6 — Jogo da Memória
+
+**Adicionada ao escopo em 2026-08-24.**
+
+**O que faz:**
+Totem touch com um jogo da memória sobre paleontologia e biomas do sertão — o visitante encontra pares de cartas com animais, fósseis e plantas da região, contra um relógio, e entra num ranking.
+
+**✅ Implementada em 2026-08-24, a partir do PDF `design/sala6/Jogo da memoria.pdf` (11 páginas).** As 7 telas foram construídas e conferidas uma a uma no navegador contra o protótipo.
+
+**As 7 telas** (página do PDF entre parênteses): menu (p.1), novo jogo (p.2), tabuleiro fácil (p.3/4), tabuleiro difícil (p.7/8), "recomeçar?" (p.5), "você venceu!" (p.9), "você perdeu" (p.10) e ranking geral (p.11).
+
+**⚠️ São 2 dificuldades no protótipo, não 3.** O pedido inicial falava em três níveis, mas o PDF define **apenas FÁCIL e DIFÍCIL** — e o ranking da p.11 tem exatamente duas colunas, "MODO FÁCIL" e "MODO DIFÍCIL". Foi implementado o que o protótipo mostra. Acrescentar um nível intermediário é uma entrada nova em `DIFICULDADES` (`lib/sala6/dificuldades.ts`) mais uma coluna no ranking; o resto do código não distingue níveis por nome, então nada mais precisa mudar. **Falta decidir se o terceiro nível entra ou se dois era mesmo a intenção.**
+
+| Nível | Grade | Pares | Tempo |
+|---|---|---|---|
+| Fácil | 6 × 3 | 9 (das 16 cartas) | 2:00 |
+| Difícil | 8 × 4 | 16 (todas) | 3:00 |
+
+**Ranking:** tabela `pontuacoes_sala6` no Postgres, uma linha por partida **vencida** — quem perde no tempo não pontua, e é por isso que comparar tempos entre as linhas é justo. Ordenado por tempo crescente, com a data como desempate. **É por dificuldade, e não um placar único:** uma partida de 9 pares e uma de 16 não são comparáveis. API em `app/api/sala6/ranking/route.ts` (GET devolve as duas colunas prontas; POST grava). O nome do jogador é digitado na tela de novo jogo, e não no fim — como no protótipo.
+
+**Como as medidas foram extraídas:** o PDF vem num canvas de 1920×1080, o mesmo do XD das outras salas, e é **vetorial** — então cores, posições, tamanhos e tipografia foram lidos dos objetos do arquivo em vez de amostrados na imagem renderizada. Isso importa porque a renderização mistura as camadas translúcidas e devolve cores que não existem no arquivo. A entreletra foi calculada comparando a largura de cada trecho com a largura natural da mesma string na Futura PT real (de `public/fonts/`): **27 dos 29 trechos medidos caem em 0,19–0,20em ou 0,49–0,50em**, o que mostra que são dois valores escolhidos, não variação. Os três níveis viraram `TRACKING` em `lib/sala6/medidas.ts`.
+
+**Unidade de medida:** `d(px)` em `lib/sala6/medidas.ts` converte direto o número lido do PDF, sobre `--u: min(1vw, 1.7778vh)`. Cada tela é uma composição fechada de 16:9 que precisa caber inteira sem rolagem, então a unidade é limitada pelos dois eixos e o canvas fica centralizado — em tela fora de 16:9 sobra faixa, que é o certo, já que esticar desalinharia a grade de cartas em relação ao cabeçalho. Diferente do Admin, não há teto em pixels: o totem é tela cheia.
+
+**Arquitetura — o que esta sala não tem:** é **uma tela só, autocontida**. Sem sincronização entre dispositivos (nada de tablet↔TV como a Sala 1, nem Escada→Sala 7), portanto **sem Socket.IO**. O servidor só entra para gravar e ler o ranking. Também **não exige HTTPS por motivo de hardware** (sem câmera, sem microfone), embora rode sob o mesmo Caddy.
+
+**Detalhes dos assets que mudaram o desenho do código:**
+- **A face da carta é a imagem inteira.** Os arquivos em `public/images/sala6/` já trazem a arte, o nome popular e o nome científico embutidos — no PDF a carta virada é uma imagem achatada, não texto sobre foto. Não há legenda a renderizar.
+- **O verso também é asset pronto** (`peca-facil.png` / `peca-dificil.png`), com a logo já esmaecida dentro.
+- **As casinhas de VOLTAR/SAIR/MENU trazem o rótulo desenhado no PNG** (134×218 = 67×109 no canvas, ícone + rótulo). Por isso `components/sala6/Casa.tsx` só posiciona a imagem, sem texto nem cor — a variante certa é escolhida pelo arquivo.
+- **A coroa do 1º lugar não veio como asset** e é desenhada em SVG.
+- **A logo horizontal da p.11 não veio** (só as verticais bege e marrom). Está a vertical no mesmo alinhamento à direita até a horizontal chegar.
+- `sair-marrom-claro.png` não é usado por nenhuma tela do PDF.
+
+**Nomes dos arquivos foram normalizados** (`"Jogo da memoria_Preguiça Gigante.jpg"` → `preguica-gigante.jpg`, `"Peça Fácil@2x.png"` → `peca-facil.png`), seguindo o que já se fez na Sala 1.
+
+**Decisão de lógica que vale registrar:** o toque numa carta não lê o estado do tabuleiro — ele só descreve a intenção, e quem decide é o atualizador de estado. Isso foi encontrado testando: **dois toques no mesmo tique do JavaScript caem no mesmo lote de atualização do React**, e se o handler lesse o estado da renderização, ambos leriam o tabuleiro anterior e a segunda carta apagaria a primeira em vez de formar par. Num totem touch onde criança bate na tela, um toque duplo rápido cai exatamente nesse caso. Pelo mesmo motivo, o desfecho da partida (venceu/perdeu) é **derivado** do tabuleiro em vez de guardado — guardá-lo abriria a possibilidade de ele discordar das cartas.
+
+**Pendências:** decidir sobre o terceiro nível (acima); confirmar se o ranking acumula desde a inauguração ou zera periodicamente; logo horizontal da p.11. **As 16 imagens somam ~20 MB** e hoje entram na imagem Docker — servi-las pelo Caddy junto com `/videos` e `/uploads` é o mesmo corte já feito na melhoria 1 da lista de VPS.
+
+**Ajustes de 2026-08-24, depois de rodar o fluxo:**
+- **O nome do jogador é zerado em toda saída para o menu.** Antes ele sobrevivia entre visitantes: além de confuso, fazia a pontuação de quem vencesse entrar no ranking com o nome de outra pessoa.
+- **O painel central desce até o rodapé**, e não até o `y=930` do PDF — ali o protótipo abre espaço para o teclado do sistema, mas como o teclado é sobreposto, o painel interrompido deixava uma faixa de fundo solta embaixo. Só a altura mudou: todo o conteúdo é posicionado em relação à página, não ao painel.
+- **A casinha de SAIR tem área de toque de 147×189**, contra os 67×109 desenhados, por preenchimento com a posição recuada no mesmo valor — cresce sem o ícone sair do lugar. **40 é o teto:** no tabuleiro difícil sobram 12px até a primeira carta, e mais que isso faria a casinha engolir toques que deveriam virar carta.
+- **`touch-action: manipulation` na sala inteira**, senão o navegador segura cada toque ~300ms esperando ver se vira duplo-toque de zoom — atraso que num jogo contra o relógio ainda come tempo da partida.
+- **Teclado embutido na tela de novo jogo** — ver a seção "Teclado on-screen".
+
+**⚠️ Impacto no orçamento:** o orçamento foi fechado em 2026-07-20 com **3 sistemas** (~116h / R$ 4.500). A Sala 6 é escopo novo, não coberto por aquele documento — estimativa preliminar de **14–20h** (jogo + ranking + persistência + fidelidade visual). Precisa ser conversado com a empresa antes de entrar como trabalho não remunerado. Ver seção "Orçamento de Gabriel" abaixo.
+
+---
+
+## Teclado on-screen (Escada + Sala 6)
+
+**`components/TecladoVirtual.tsx`, restaurado e compartilhado em 2026-08-24.**
+
+**Por que existe:** os dispositivos são monitores touch sem teclado físico. Depender do teclado nativo do sistema é uma aposta que só se confere em campo — em Chromium modo kiosk o teclado do Windows não sobe sozinho sem o modo tablet configurado, e um totem onde não dá para digitar o nome é um totem parado. Sendo do app, funciona igual em qualquer SO e é testável antes da viagem. O protótipo da Sala 6 (p.2) desenha o teclado do Windows, mas ali é só ilustração.
+
+Monta-se sozinho sobre qualquer campo de texto que receba foco — quem usa só renderiza o componente. **Os campos precisam de `inputMode="none"`**, senão o teclado do sistema abre por cima. Já aplicado nos quatro campos de digitação do projeto: nome e e-mail (`TelaInformacoes`), depoimento (`TelaTexto`) e nome de jogador (Sala 6). **PAÍS e ESTADO não entram na conta** — são o `SeletorOpcao`, que abre um painel de opções e nunca chamou teclado.
+
+**Escreve pelo setter nativo do DOM, não por `elemento.value =`.** O React instala o próprio descritor em `value`; atribuir direto atualiza o DOM sem que ele perceba e o valor antigo volta no render seguinte. Passando pelo setter do protótipo e disparando `input`, o `onChange` do componente roda como se a pessoa tivesse digitado — inclusive as transformações que ele aplique, como o caixa-alta e o limite de 24 caracteres da Sala 6.
+
+**A tela sobe só onde e só enquanto precisa.** O teclado devolve por `onDeslocar` quantos pixels faltam para o campo em foco escapar dele, e a tela aplica isso como `translateY`. Na Sala 6 e na tela de informações da Escada o valor é sempre zero e nada se move; no depoimento, onde sobram só **17vh** abaixo do campo, a tela sobe ~150px e volta ao lugar quando o teclado fecha. Em repouso o desenho continua sendo exatamente o que foi validado contra o protótipo.
+
+**Duas armadilhas resolvidas, que voltam se alguém mexer:**
+1. **A medida do deslocamento é de layout (`offsetTop`), não de tela (`getBoundingClientRect`).** A segunda enxerga o deslocamento que o próprio cálculo acabou de provocar: ao abrir a fileira de acentos ele mediria a tela já erguida, devolveria um valor menor, e a tela desceria de volta sobre o teclado.
+2. **`input[type=email]` não suporta seleção de texto** — `selectionStart` vem nulo e `setSelectionRange` lança `InvalidStateError`. **Este era um bug real da implementação original:** cada tecla no campo de e-mail da Escada lançava exceção, e o cursor não funcionava nele. As operações de cursor agora tratam esse caso.
+
+**A geometria é uma só, e mora no componente.** Ela ficava a cargo de quem chamava, e como a Escada e a Sala 6 medem as próprias telas em unidades diferentes (vw/vh solto contra um canvas 16:9), saía um teclado de tamanho diferente por sala. Como as duas partem do mesmo canvas de projeto 1920×1080, a unidade `min(1vw, 1.7778vh)` descreve as duas. Conferido no navegador: **tecla 98×56, área de teclas 1150px, fonte 24,5px e altura 275px, idênticos nas duas salas.**
+
+- **Escala 28 (do canvas), calibrada pela tela mais restrita**, a de novo jogo da Sala 6: entre o fim do INICIAR (y=681) e o rodapé sobram 399, e o teclado precisa caber ali **na altura máxima** — cinco fileiras, com os acentos abertos. Encobrir o INICIAR o tornaria intocável, já que não existe tecla Enter para substituí-lo. Mexer na escala exige refazer essa conta.
+- **É uma peça fechada e centralizada: acabaram as teclas, acabou o teclado** — não uma barra atravessando a tela. Esticadas na largura inteira as teclas ficariam largas e baixas, e o dedo erra a fileira antes da coluna.
+- **O vão que aparece quando a tela sobe é preenchido por uma camada de fundo na Escada**, não pelo teclado. Ela precisa ficar **fora** da div que se desloca: com a cor na div que se move, ela sobe junto e o vão continua branco.
+- **`ancoragem`** decide se o teclado se prende à janela (Escada, que ocupa a tela toda) ou ao ancestral posicionado (Sala 6, cujo canvas centralizado deixaria um teclado preso à janela fora de lugar).
+
+**Pendência:** validar com dedo de verdade no monitor touch do museu. O que foi testado aqui é o comportamento (digitar, apagar, acentos, troca de campo, deslocamento, retorno ao lugar), não o acerto do toque.
+
+---
+
 ## Arquitetura Técnica
 
 ### Stack (atualizada — ver decisão de hospedagem abaixo)
@@ -151,9 +273,13 @@ Totem com chatbot guiado por menus sobre o tema Cangaço. Não é IA generativa 
 /sala1/tablet → Tela de seleção de tema (interação do visitante)
 /sala1/tv     → Tela de exibição (loop + vídeo do tema), sincronizada via WebSocket
 /escada       → Cabine lambe-lambe (foto/vídeo)
+/sala6        → Jogo da memória + ranking
+/api/sala6/ranking → Placar por dificuldade (GET lê, POST grava a partida vencida)
 /sala7        → Galeria de depoimentos em loop (TV)
 /sala8        → Assistente virtual do Cangaço (ainda não implementada — fluxo completo)
 /sala8/teste-voz → Protótipo isolado de reconhecimento de voz (POC, fora do fluxo final)
+/admin        → Moderação dos depoimentos da Escada
+/admin/login  → Autenticação do Admin
 ```
 
 ### Pacotes do repositório
@@ -249,6 +375,11 @@ Com a decisão de hospedar em VPS (internet estável confirmada no museu), esta 
 | 6 | Haverá alguém do museu treinado para operação básica (religar cabo, reiniciar tablet)? | Define o nível do documento de operação a entregar |
 | ~~7~~ | ~~Qual VPS/provedor será usado e quem paga por ela?~~ | ✅ **RESOLVIDA (2026-07-20):** Hostinger VPS KVM 2 (São Paulo), R$ 42,99/mês por 24 meses; conta aberta e paga por boleto pelo próprio museu. Ver "Dimensionamento da VPS" acima. |
 | 8 | Nomes exatos dos cues no MadMapper, porta OSC, e em qual PC do museu roda o agente | Necessários para configurar `apps/agente-madmapper/config.json`. O trigger é da **Sala 1**. |
+| ~~9~~ | ~~**Sala 6:** ícones, prints do protótipo e imagens das cartas~~ | ✅ **RESOLVIDA (2026-08-24):** tudo entregue e a sala implementada a partir do PDF. |
+| 10 | **Sala 6: são 2 dificuldades ou 3?** O protótipo só define FÁCIL e DIFÍCIL | O pedido falava em 3 níveis. Foi implementado o que o PDF mostra. Ver seção Sala 6. |
+| 12 | **Sala 6:** o ranking acumula desde a inauguração ou zera periodicamente? | Sem zeragem, em alguns meses o topo fica inalcançável e o placar perde graça para o visitante novo. |
+| ~~13~~ | ~~O teclado nativo do Windows abre sozinho em Chromium kiosk?~~ | ✅ **DEIXOU DE IMPORTAR (2026-08-24):** o teclado embutido foi restaurado e ligado na Escada e na Sala 6, com `inputMode="none"` nos campos. Não se depende mais do SO. Falta só validar o acerto do toque no monitor do museu. |
+| 11 | **Sala 6 entra no orçamento como aditivo?** | Escopo novo depois do orçamento fechado (~14–20h). Precisa ser acertado com a empresa. |
 
 ---
 
@@ -289,7 +420,15 @@ SUPORTE PÓS-INAUGURAÇÃO (opcional — propor ao cliente)
 | Sala 7 (galeria em tempo real) | 12h |
 | Modo kiosk, PM2, deploy nos dispositivos | 8h |
 | Testes e correções | 20h |
-| **Total** | **~116h** |
+| **Total (escopo do orçamento fechado)** | **~116h** |
+
+**Escopo adicionado depois do orçamento fechado — não coberto pelos R$ 4.500:**
+
+| Entrega | Horas |
+|---|---|
+| Sala 6 (jogo da memória + ranking) | 14–20h |
+
+A Sala 6 entrou no pedido em **2026-08-24**, mais de um mês depois do orçamento assinado. Aos ~R$ 39/h do próprio orçamento, isso equivale a **R$ 550 – R$ 780**. Decidir com a empresa se vira aditivo, se substitui alguma outra entrega, ou se é absorvido — mas registrar a decisão, e não deixar passar por omissão. Ver dúvida em aberto #11.
 
 ---
 
@@ -304,6 +443,8 @@ SUPORTE PÓS-INAUGURAÇÃO (opcional — propor ao cliente)
 | Agosto semana 3 | Sala 7 — galeria em tempo real |
 | Agosto semana 4 | Integração, modo kiosk, PM2, testes |
 | Setembro | Buffer: testes no espaço físico, calibração com MadMapper, inauguração |
+
+**⚠️ Situação real em 2026-08-24:** o cronograma acima está estourado. Escada, Sala 7 e Admin estão prontos; a Sala 1 está funcional só em teste local; a **Sala 8 não tem fluxo implementado** (só a POC de voz) e está travada esperando o roteiro; a **Sala 6 acaba de entrar no escopo** e está travada esperando os assets; e **nada foi testado no hardware físico nem foi feito deploy na VPS**. Com a inauguração em setembro, o caminho crítico é: (1) cobrar o roteiro da Sala 8 e os assets da Sala 6, que são bloqueios externos e por isso precisam ser cobrados primeiro; (2) deploy na VPS; (3) validação no hardware do museu.
 
 ---
 

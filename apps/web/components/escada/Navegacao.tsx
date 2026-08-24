@@ -1,7 +1,16 @@
 import Image from "next/image";
 import { cores } from "@/lib/escada/cores";
+import { ESCADA } from "@/lib/escada/estilos";
 
-// Tamanhos padrão em vw (canvas 1920px): texto 21.6px→1.125vw, ícone 20px→1.04vw
+/**
+ * As duas setas são o mesmo arquivo.
+ *
+ * O ANTERIOR usava `voltar1.png`, um desenho diferente do `seta2.png` do PRÓXIMO —
+ * lado a lado numa mesma tela os dois não combinavam. Agora a da esquerda é a mesma
+ * seta espelhada, o que garante peso, espessura e proporção idênticos aos da direita
+ * sem depender de dois arquivos continuarem parecidos.
+ */
+const SETA = "/icons/escada/seta2.png";
 
 interface NavegacaoProps {
   onAnterior?: () => void;
@@ -10,6 +19,8 @@ interface NavegacaoProps {
   centralizado?: boolean;
   tamanhoTexto?: string;
   tamanhoIcone?: string;
+  recuo?: string;
+  espaco?: string;
 }
 
 export function Navegacao({
@@ -17,25 +28,44 @@ export function Navegacao({
   onProximo,
   proximoHabilitado = true,
   centralizado = false,
-  tamanhoTexto = "1.125vw",
-  tamanhoIcone = "1.04vw",
+  tamanhoTexto = ESCADA.navegacao.tamanhoTexto,
+  tamanhoIcone = ESCADA.navegacao.tamanhoIcone,
+  recuo = ESCADA.navegacao.recuo,
+  espaco = ESCADA.navegacao.espaco,
 }: NavegacaoProps) {
-  const classeContainer = centralizado
-    ? "pointer-events-none absolute inset-y-0 left-[1.67vw] right-[1.67vw] flex items-center justify-between"
-    : "flex w-full items-center justify-between";
+  const estiloIcone = { width: tamanhoIcone, height: tamanhoIcone };
+  const estiloTexto = { color: cores.textoEscuro, fontSize: tamanhoTexto };
 
   return (
-    <div className={classeContainer}>
+    <div
+      className={
+        centralizado
+          ? "pointer-events-none absolute inset-y-0 flex items-center justify-between"
+          : "flex w-full items-center justify-between"
+      }
+      style={
+        centralizado
+          ? { left: recuo, right: recuo }
+          : // Em fluxo o container já herda o respiro de 2,5vw da moldura da tela,
+            // então aqui entra só a diferença até o recuo do protótipo.
+            { paddingInline: `calc(${recuo} - 2.5vw)` }
+      }
+    >
       {onAnterior ? (
-        <button onClick={onAnterior} className="pointer-events-auto flex items-center gap-[0.42vw] cursor-pointer">
+        <button
+          onClick={onAnterior}
+          className="pointer-events-auto flex cursor-pointer items-center"
+          style={{ gap: espaco }}
+        >
           <Image
-            src="/icons/escada/voltar1.png"
+            src={SETA}
             alt=""
-            width={20}
-            height={20}
-            style={{ width: tamanhoIcone, height: tamanhoIcone }}
+            width={401}
+            height={401}
+            // Espelhada na horizontal: é a seta do PRÓXIMO apontando para o outro lado.
+            style={{ ...estiloIcone, transform: "scaleX(-1)" }}
           />
-          <span className="font-bold tracking-wide" style={{ color: cores.textoEscuro, fontSize: tamanhoTexto }}>
+          <span className="font-bold tracking-wide" style={estiloTexto}>
             ANTERIOR
           </span>
         </button>
@@ -47,18 +77,13 @@ export function Navegacao({
         <button
           onClick={onProximo}
           disabled={!proximoHabilitado}
-          className="pointer-events-auto flex items-center gap-[0.42vw] cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+          className="pointer-events-auto flex cursor-pointer items-center disabled:cursor-not-allowed disabled:opacity-40"
+          style={{ gap: espaco }}
         >
-          <span className="font-bold tracking-wide" style={{ color: cores.textoEscuro, fontSize: tamanhoTexto }}>
+          <span className="font-bold tracking-wide" style={estiloTexto}>
             PRÓXIMO
           </span>
-          <Image
-            src="/icons/escada/seta2.png"
-            alt=""
-            width={20}
-            height={20}
-            style={{ width: tamanhoIcone, height: tamanhoIcone }}
-          />
+          <Image src={SETA} alt="" width={401} height={401} style={estiloIcone} />
         </button>
       )}
     </div>

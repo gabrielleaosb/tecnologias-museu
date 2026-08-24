@@ -1,0 +1,10 @@
+Prints e PDFs do protótipo da Sala 6, para a passada de fidelidade visual.
+
+Material de REFERÊNCIA de desenvolvimento — não é servido pelo app, ao
+contrário de public/. Nada aqui vai parar no navegador do visitante.
+
+Uma imagem por tela, nomeada pela tela que representa. Ex:
+01-menu-dificuldade.png, 02-partida.png, 03-resultado.png, 04-ranking.png
+
+Se houver CSS exportado do Adobe XD, colocar junto — foi o que deu o melhor
+resultado nas telas da Escada.

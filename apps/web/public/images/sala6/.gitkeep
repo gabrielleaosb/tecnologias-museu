@@ -1,0 +1,7 @@
+Figuras das cartas do jogo da memória (o conteúdo dos pares: fotos do acervo,
+personagens, objetos).
+
+PNG/JPG, nomes minúsculos, sem acento e sem espaço, numerados. Ex:
+carta-01-lampiao.png, carta-02-maria-bonita.png
+
+Mesma convenção de public/images/sala1/.

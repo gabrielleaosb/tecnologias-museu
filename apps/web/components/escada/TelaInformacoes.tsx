@@ -1,5 +1,4 @@
 import Image from "next/image";
-import { cores } from "@/lib/escada/cores";
 import { ESCADA } from "@/lib/escada/estilos";
 import { Logo } from "@/components/escada/Logo";
 import { Navegacao } from "@/components/escada/Navegacao";
@@ -47,12 +46,18 @@ export function TelaInformacoes({ tipo, nome, email, onNomeChange, onEmailChange
           Informações básicas (obrigatório)
         </p>
 
-        <div className="flex flex-col items-center" style={{ gap: "0.63vw" }}>
+        <div className="flex flex-col items-center" style={{ gap: ESCADA.espacoEntreCampos }}>
+          {/*
+            `inputMode="none"` nos dois campos: quem digita é o teclado do app
+            (components/TecladoVirtual.tsx), e sem isto o teclado do sistema abriria
+            por cima dele. O campo continua focável e editável normalmente.
+          */}
           <input
             type="text"
             value={nome}
             onChange={(e) => onNomeChange(e.target.value)}
             placeholder="Nome"
+            inputMode="none"
             className="text-center outline-none placeholder:font-medium placeholder:text-[#3D2A1A]"
             style={estiloInput}
           />
@@ -61,6 +66,7 @@ export function TelaInformacoes({ tipo, nome, email, onNomeChange, onEmailChange
             value={email}
             onChange={(e) => onEmailChange(e.target.value)}
             placeholder="E-mail"
+            inputMode="none"
             className="text-center outline-none placeholder:font-medium placeholder:text-[#3D2A1A]"
             style={estiloInput}
           />

@@ -61,9 +61,9 @@ export function TelaOrigem({ tipo, nome, pais, estado, onPaisChange, onEstadoCha
           De onde você veio?
         </p>
 
-        <div className="flex flex-col" style={{ gap: "0.63vw" }}>
+        <div className="flex flex-col" style={{ gap: ESCADA.espacoEntreCampos }}>
           <label className="flex items-center" style={{ gap: ESCADA.origem.espaco }}>
-            <span className="font-bold text-left" style={{ ...ESCADA.texto.corpo, width: ESCADA.origem.rotulo }}>
+            <span className="text-left" style={{ ...ESCADA.texto.rotulo, fontWeight: 600, width: ESCADA.origem.rotulo }}>
               PAÍS
             </span>
             <SeletorOpcao
@@ -78,7 +78,7 @@ export function TelaOrigem({ tipo, nome, pais, estado, onPaisChange, onEstadoCha
             />
           </label>
           <label className="flex items-center" style={{ gap: ESCADA.origem.espaco }}>
-            <span className="font-bold text-left" style={{ ...ESCADA.texto.corpo, width: ESCADA.origem.rotulo }}>
+            <span className="text-left" style={{ ...ESCADA.texto.rotulo, fontWeight: 600, width: ESCADA.origem.rotulo }}>
               ESTADO
             </span>
             <SeletorOpcao

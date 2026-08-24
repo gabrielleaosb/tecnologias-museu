@@ -10,6 +10,8 @@ import { TelaCaptura } from "@/components/escada/TelaCaptura";
 import { TelaPreview } from "@/components/escada/TelaPreview";
 import { TelaTexto } from "@/components/escada/TelaTexto";
 import { TelaAgradecimento } from "@/components/escada/TelaAgradecimento";
+import { TecladoVirtual } from "@/components/TecladoVirtual";
+import { cores } from "@/lib/escada/cores";
 import { PAIS_PADRAO } from "@/lib/escada/paises";
 
 type Passo =
@@ -43,6 +45,8 @@ export default function EscadaPage() {
   const [dados, setDados] = useState(ESTADO_INICIAL);
   const [enviando, setEnviando] = useState(false);
   const [erroEnvio, setErroEnvio] = useState<string | null>(null);
+  /** Quanto a tela precisa subir para o campo em foco escapar do teclado. */
+  const [deslocamentoTeclado, setDeslocamentoTeclado] = useState(0);
 
   function reiniciar() {
     if (dados.midiaUrl) URL.revokeObjectURL(dados.midiaUrl);
@@ -118,7 +122,41 @@ export default function EscadaPage() {
     }
   }
 
-  return renderizarPasso();
+  return (
+    <>
+      {/*
+        A tela sobe só enquanto o teclado está aberto e só o tanto que o campo em
+        foco precisa — no depoimento sobram 17vh abaixo do campo, e o teclado não
+        cabe ali. Em repouso o deslocamento é zero e o desenho é exatamente o que
+        foi validado contra o protótipo.
+      */}
+      {/*
+        Fundo do vão: ao subir, a tela deixa atrás de si uma faixa da altura do
+        deslocamento. Esta camada não se desloca — se a cor estivesse na div que se
+        move, ela subiria junto e o vão continuaria branco. Fixar a cor é seguro: o
+        teclado só abre nas telas com campo de texto — informações e depoimento — e
+        as duas usam o fundo claro de `ESCADA.tela`.
+      */}
+      <div
+        // `overflow-hidden`: as telas medem 100vw, que inclui a barra de rolagem, e
+        // qualquer sobra vira uma barra horizontal no rodapé do totem.
+        className="h-screen overflow-hidden"
+        style={{ backgroundColor: cores.fundoClaro }}
+      >
+        <div
+          style={{
+            transform: `translateY(-${deslocamentoTeclado}px)`,
+            transition: "transform 180ms ease-out",
+          }}
+        >
+          {renderizarPasso()}
+        </div>
+      </div>
+
+      {/* Fora da div que se desloca: o teclado fica preso ao rodapé da tela. */}
+      <TecladoVirtual onDeslocar={setDeslocamentoTeclado} />
+    </>
+  );
 
   function renderizarPasso() {
     switch (passo) {

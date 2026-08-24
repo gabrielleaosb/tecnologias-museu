@@ -16,3 +16,24 @@ export const depoimentos = pgTable("depoimentos", {
 
 export type Depoimento = typeof depoimentos.$inferSelect;
 export type NovoDepoimento = typeof depoimentos.$inferInsert;
+
+/**
+ * Ranking do jogo da memória da Sala 6. Uma linha por partida vencida — quem perde
+ * no tempo não pontua, então o ranking só tem partidas completas e é por isso que
+ * comparar `segundos` entre elas é justo.
+ *
+ * `dificuldade` faz parte da chave de leitura, e não é um filtro opcional: o
+ * protótipo mostra dois rankings lado a lado (p.11 do PDF) porque uma partida de
+ * 9 pares e uma de 16 não são comparáveis num placar único.
+ */
+export const pontuacoesSala6 = pgTable("pontuacoes_sala6", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  jogador: text("jogador").notNull(),
+  dificuldade: text("dificuldade", { enum: ["facil", "dificil"] }).notNull(),
+  /** Tempo gasto para fechar todos os pares. Menor é melhor. */
+  segundos: integer("segundos").notNull(),
+  criadoEm: timestamp("criado_em", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export type PontuacaoSala6 = typeof pontuacoesSala6.$inferSelect;
+export type NovaPontuacaoSala6 = typeof pontuacoesSala6.$inferInsert;

@@ -8,6 +8,13 @@
       "when": 1783471613309,
       "tag": "0000_icy_vargas",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1787578469519,
+      "tag": "0001_small_sunfire",
+      "breakpoints": true
     }
   ]
 }
