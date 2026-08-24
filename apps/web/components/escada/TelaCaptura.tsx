@@ -19,8 +19,15 @@ const DURACAO_MAXIMA_VIDEO_S = 60;
  */
 const XD = {
   logo: { esquerda: "4.53vw", topo: "5.46vh", largura: "17.29vw" },
-  /** Prévia da câmera, 16:9, à esquerda. */
-  previa: { esquerda: "3.9vw", topo: "24.63vh", largura: "51.04vw", altura: "51.2vh" },
+  /**
+   * Prévia da câmera, à esquerda.
+   *
+   * A altura sai da proporção 16:9 sobre a largura, e não de um valor em `vh`. Com
+   * largura em `vw` e altura em `vh` os dois eixos escalam independentes, e a caixa
+   * esticava conforme o formato do monitor — só ficava certa num 16:9 exato. Aqui a
+   * proporção é a mesma em qualquer tela.
+   */
+  previa: { esquerda: "3.9vw", topo: "24.63vh", largura: "51.04vw", proporcao: "16 / 9" },
   /** Contador regressivo, dentro da prévia, no canto superior direito. */
   contador: { recuo: "1.4vw", tamanho: "5.94vw", texto: "3.2vw" },
   /**
@@ -158,7 +165,7 @@ export function TelaCaptura({ tipo, onCapturado, onAnterior }: TelaCapturaProps)
           left: XD.previa.esquerda,
           top: XD.previa.topo,
           width: XD.previa.largura,
-          height: XD.previa.altura,
+          aspectRatio: XD.previa.proporcao,
           borderRadius: "0.3vw",
         }}
       >
