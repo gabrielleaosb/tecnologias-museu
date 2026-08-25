@@ -1,29 +1,66 @@
-import Image from "next/image";
 import type { DepoimentoPublico } from "@/lib/socket/eventos";
-import { coresSala7 } from "@/lib/sala7/cores";
+import { galeria, g, PESO } from "@/lib/sala7/medidas";
 
+/**
+ * Card da grade: a mídia preenche o retângulo 16:9 inteiro, com o anel de tipo no
+ * alto à esquerda e o nome do visitante embaixo.
+ *
+ * O anel e o ícone são desenhados aqui, e não trazidos de `public/icons`: os PNGs da
+ * Escada são um disco salmão com o símbolo escuro dentro (é assim que a cabine usa),
+ * enquanto no protótipo da galeria o que aparece é o contorno vazado em branco sobre
+ * a foto. Repintar o PNG por filtro não produziria o vazado.
+ */
 export function CardDepoimento({ depoimento, onClick }: { depoimento: DepoimentoPublico; onClick: () => void }) {
+  const { card } = galeria;
+
   return (
-    <button onClick={onClick} className="relative aspect-video w-full overflow-hidden rounded-md bg-black cursor-pointer">
+    <button
+      onClick={onClick}
+      className="relative w-full cursor-pointer overflow-hidden bg-black"
+      style={{ aspectRatio: "16 / 9" }}
+    >
       {depoimento.tipo === "video" ? (
         <video src={depoimento.arquivoUrl} muted preload="metadata" className="h-full w-full object-cover" />
       ) : (
-        <img src={depoimento.arquivoUrl} alt={depoimento.nome} className="h-full w-full object-cover" />
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={depoimento.arquivoUrl} alt="" className="h-full w-full object-cover" />
       )}
-      <span className="absolute left-3 top-3 flex h-8 w-8 items-center justify-center rounded-full bg-white/80">
-        <Image
-          src={depoimento.tipo === "video" ? "/icons/escada/play.png" : "/icons/escada/foto.png"}
-          alt=""
-          width={16}
-          height={16}
-          className="h-4 w-4"
-        />
-      </span>
+
       <span
-        className="absolute inset-x-0 bottom-0 px-3 py-2 text-left text-sm font-bold text-white"
-        style={{ background: "linear-gradient(to top, rgba(0,0,0,0.6), transparent)" }}
+        className="absolute flex items-center justify-center rounded-full"
+        style={{
+          left: g(card.anel.recuo),
+          top: g(card.anel.recuo),
+          width: g(card.anel.tamanho),
+          height: g(card.anel.tamanho),
+          border: `${g(card.anel.traco)} solid #FFFFFF`,
+        }}
       >
-        {depoimento.nome.toUpperCase()}
+        {depoimento.tipo === "video" ? (
+          <svg viewBox="0 0 24 24" style={{ width: "48%" }} fill="#FFFFFF" aria-hidden>
+            <path d="M8 5.5v13l11-6.5z" />
+          </svg>
+        ) : (
+          <svg viewBox="0 0 24 24" style={{ width: "52%" }} fill="none" stroke="#FFFFFF" strokeWidth="2" aria-hidden>
+            <path d="M3 8.5h3.5L8 6.5h8l1.5 2H21v10H3z" strokeLinejoin="round" />
+            <circle cx="12" cy="13" r="3.2" />
+          </svg>
+        )}
+      </span>
+
+      <span
+        className="absolute text-left uppercase"
+        style={{
+          left: g(card.nome.recuo),
+          bottom: g(card.nome.base),
+          color: "#FFFFFF",
+          fontSize: g(card.nome.texto),
+          fontWeight: PESO.bold,
+          letterSpacing: g(card.nome.tracking),
+          lineHeight: 1,
+        }}
+      >
+        {depoimento.nome}
       </span>
     </button>
   );

@@ -1,4 +1,8 @@
+"use client";
+
+import { useState } from "react";
 import { coresSala7 } from "@/lib/sala7/cores";
+import { galeria, g, PESO } from "@/lib/sala7/medidas";
 
 export type FiltroTipo = "todos" | "foto" | "video";
 export type Ordenacao = "recentes" | "prestigiados";
@@ -10,47 +14,72 @@ interface PainelFiltroProps {
   onOrdenacaoChange: (ordenacao: Ordenacao) => void;
 }
 
+/**
+ * Painel de filtro, flutuando sobre a quarta coluna de cards.
+ *
+ * **Em repouso é só a barra FILTRAR**; tocar nela abre as quatro opções, e escolher
+ * uma fecha de novo. O protótipo desenha o painel sempre aberto, mas aberto ele cobre
+ * um card inteiro da quarta coluna o tempo todo — fechado, ocupa só a faixa acima da
+ * grade, onde não há card nenhum. Como o filtro é usado uma vez e a galeria fica
+ * exposta o resto do tempo, o padrão passa a ser a galeria inteira visível.
+ *
+ * O protótipo também não marca item ativo — os quatro saem iguais. Aqui eles de fato
+ * ligam e desligam, então o ativo ganha o peso Heavy: sem isso, ao reabrir o painel
+ * não haveria como saber o que está valendo.
+ */
 export function PainelFiltro({ tipo, ordenacao, onTipoChange, onOrdenacaoChange }: PainelFiltroProps) {
-  const itemClasse = "w-full rounded-md px-4 py-2 text-left cursor-pointer";
+  const [aberto, setAberto] = useState(false);
+  const { filtro } = galeria;
+
+  const itens = [
+    { rotulo: "Fotos", ativo: tipo === "foto", acionar: () => onTipoChange(tipo === "foto" ? "todos" : "foto") },
+    { rotulo: "Vídeos", ativo: tipo === "video", acionar: () => onTipoChange(tipo === "video" ? "todos" : "video") },
+    { rotulo: "Mais recentes", ativo: ordenacao === "recentes", acionar: () => onOrdenacaoChange("recentes") },
+    { rotulo: "Mais prestigiados", ativo: ordenacao === "prestigiados", acionar: () => onOrdenacaoChange("prestigiados") },
+  ];
 
   return (
-    <div className="flex w-48 flex-col overflow-hidden rounded-md shadow-lg">
-      <h2
-        className="px-4 py-3 text-sm font-extrabold tracking-wide text-white"
-        style={{ backgroundColor: coresSala7.painelFiltro }}
+    <div className="flex flex-col overflow-hidden" style={{ width: g(filtro.largura) }}>
+      <button
+        onClick={() => setAberto((estava) => !estava)}
+        aria-expanded={aberto}
+        className="flex w-full cursor-pointer items-center justify-center uppercase"
+        style={{
+          height: g(filtro.cabecalho.altura),
+          backgroundColor: coresSala7.painelCabecalho,
+          color: coresSala7.textoClaro,
+          fontSize: g(filtro.cabecalho.texto),
+          fontWeight: PESO.bold,
+          letterSpacing: g(filtro.cabecalho.tracking),
+        }}
       >
-        FILTRAR
-      </h2>
-      <div className="flex flex-col gap-1 p-3" style={{ backgroundColor: coresSala7.painelFiltroItem }}>
-        <button
-          onClick={() => onTipoChange(tipo === "foto" ? "todos" : "foto")}
-          className={itemClasse}
-          style={{ color: coresSala7.texto, fontWeight: tipo === "foto" ? 800 : 500 }}
-        >
-          Fotos
-        </button>
-        <button
-          onClick={() => onTipoChange(tipo === "video" ? "todos" : "video")}
-          className={itemClasse}
-          style={{ color: coresSala7.texto, fontWeight: tipo === "video" ? 800 : 500 }}
-        >
-          Vídeos
-        </button>
-        <button
-          onClick={() => onOrdenacaoChange("recentes")}
-          className={itemClasse}
-          style={{ color: coresSala7.texto, fontWeight: ordenacao === "recentes" ? 800 : 500 }}
-        >
-          Mais recentes
-        </button>
-        <button
-          onClick={() => onOrdenacaoChange("prestigiados")}
-          className={itemClasse}
-          style={{ color: coresSala7.texto, fontWeight: ordenacao === "prestigiados" ? 800 : 500 }}
-        >
-          Mais prestigiados
-        </button>
-      </div>
+        Filtrar
+      </button>
+
+      {aberto && (
+        <div style={{ backgroundColor: coresSala7.painelCorpo }}>
+          {itens.map((item, indice) => (
+            <button
+              key={item.rotulo}
+              onClick={() => {
+                item.acionar();
+                setAberto(false);
+              }}
+              className="flex w-full cursor-pointer items-center justify-center"
+              style={{
+                height: g(filtro.item.altura),
+                color: coresSala7.textoClaro,
+                fontSize: g(filtro.item.texto),
+                fontWeight: item.ativo ? PESO.heavy : PESO.medium,
+                // O fio só separa itens vizinhos; sobre o cabeçalho ele não existe.
+                borderTop: indice === 0 ? undefined : `1px solid rgba(255, 247, 228, 0.35)`,
+              }}
+            >
+              {item.rotulo}
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

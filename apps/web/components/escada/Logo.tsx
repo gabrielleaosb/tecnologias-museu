@@ -11,11 +11,13 @@ import Image from "next/image";
 const HORIZONTAL = { width: 1401, height: 601 };
 const VERTICAL = { width: 801, height: 841 };
 
-export function Logo({ variante = "escura", style }: { variante?: "clara" | "escura" | "escura1-vertical" | "cinza-vertical"; style?: React.CSSProperties }) {
-  if (variante === "escura1-vertical") {
+export function Logo({ variante = "escura", style }: { variante?: "clara" | "escura" | "escura1-vertical" | "escura2-vertical" | "cinza-vertical"; style?: React.CSSProperties }) {
+  if (variante === "escura1-vertical" || variante === "escura2-vertical") {
+    // As duas verticais só diferem na cor do letreiro: a 1 sai em marrom médio, a 2
+    // em marrom escuro. A galeria da Sala 7 usa a 2.
     return (
       <Image
-        src="/icons/escada/logo-escura1-vertical.png"
+        src={`/icons/escada/logo-${variante === "escura2-vertical" ? "escura2" : "escura1"}-vertical.png`}
         alt="Museu do Sertão - Piranhas, AL"
         {...VERTICAL}
         style={{ width: "8.72vw", height: "auto", ...style }}

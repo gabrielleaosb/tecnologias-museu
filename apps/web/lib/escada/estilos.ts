@@ -24,6 +24,19 @@ export const ESCADA = {
   /** Ícone de vídeo/foto que encabeça as telas do miolo do fluxo. Era 6.79vw (+21%). */
   icone: "8.22vw",
 
+  /**
+   * Altura do topo do ícone de foto/vídeo, contada do topo da tela.
+   *
+   * Existe para que TelaOrigem e TelaAutorizacao — telas seguidas, onde o ícone é o
+   * único elemento que não muda — não deem um pulinho na troca. A origem chega nesta
+   * altura pelo fluxo (`tela.padding` + `conteudo.paddingTop`); a autorização, que
+   * posiciona tudo por coordenada absoluta, precisa do valor escrito.
+   *
+   * **Tem que continuar igual à soma `tela.padding + conteudo.paddingTop`** — mexeu
+   * num dos dois, mexe aqui.
+   */
+  iconeTopo: "calc(2.5vw + 1vh)",
+
   /** Bloco de conteúdo centralizado abaixo do topo. */
   conteudo: {
     gap: "1.25vw",

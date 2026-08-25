@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { getSocket } from "@/lib/socket/client";
 import type { DepoimentoPublico } from "@/lib/socket/eventos";
 import { coresSala7 } from "@/lib/sala7/cores";
+import { galeria, g, PESO } from "@/lib/sala7/medidas";
 import { jaPrestigiou, marcarPrestigiado } from "@/lib/sala7/prestigios";
 import { Logo } from "@/components/escada/Logo";
 import { CardDepoimento } from "@/components/sala7/CardDepoimento";
@@ -78,40 +79,132 @@ export default function Sala7Page() {
     );
   }
 
+  const { convite, titulo, subtitulo, logo, filtro, grade } = galeria;
+
+  /** Destaca em Heavy os números da frase, como no protótipo. */
+  const numero = (valor: number) => (
+    <strong style={{ fontWeight: PESO.heavy }}>{valor}</strong>
+  );
+
   return (
-    <div className="relative min-h-screen w-full p-8 sm:p-12" style={{ backgroundColor: coresSala7.fundo }}>
-      <div className="mb-10 flex items-start justify-between gap-8">
-        <div className="max-w-xs rounded-md p-5" style={{ backgroundColor: coresSala7.painelFiltro }}>
-          <p className="font-bold text-white">Quer aparecer nesta galeria?</p>
-          <p className="mt-2 text-sm text-white/90">
-            Vá até a cabine de gravação, localizada na escada do térreo, e registre sua visita com uma foto ou um
-            vídeo.
-          </p>
-        </div>
-
-        <div className="flex-1 text-center">
-          <h1 className="text-3xl font-extrabold tracking-wide" style={{ color: coresSala7.texto }}>
-            GALERIA DE DEPOIMENTOS
-          </h1>
-          <p className="mt-2" style={{ color: coresSala7.texto }}>
-            O Museu do Sertão já recebeu <strong>{depoimentos.length}</strong> visitantes de <strong>{estados}</strong>{" "}
-            estados e <strong>{paises}</strong> países.
-          </p>
-        </div>
-
-        <Logo variante="escura" />
+    <div
+      className="relative min-h-screen w-full"
+      style={{ backgroundColor: coresSala7.fundo, paddingBottom: g(grade.margem) }}
+    >
+      {/*
+        O cabeçalho é posicionado por coordenada, e não empilhado em fluxo: a cartela
+        de convite, o título e a logo têm alturas independentes e no protótipo não se
+        alinham por nenhuma borda comum. A grade começa depois, num `paddingTop` fixo.
+      */}
+      <div
+        className="absolute"
+        style={{
+          left: g(convite.x),
+          top: g(convite.y),
+          width: g(convite.largura),
+          height: g(convite.altura),
+          backgroundColor: coresSala7.painel,
+          borderRadius: g(convite.raio),
+        }}
+      />
+      <div
+        className="absolute text-left"
+        style={{
+          left: g(convite.texto.x),
+          top: g(convite.texto.y),
+          width: g(convite.texto.largura),
+          height: g(convite.texto.altura),
+          color: coresSala7.textoClaro,
+          fontSize: g(convite.texto.corpo),
+          letterSpacing: g(convite.texto.tracking),
+          lineHeight: `${convite.texto.entrelinha / convite.texto.corpo}`,
+        }}
+      >
+        <p style={{ fontWeight: PESO.bold }}>Quer aparecer nesta galeria?</p>
+        {/* O protótipo abre uma linha em branco entre a pergunta e a explicação. */}
+        <p style={{ marginTop: g(convite.texto.entrelinha), fontWeight: PESO.medium }}>
+          Vá até a cabine de gravação, localizada na escada do térreo, e registre sua visita com uma foto ou um vídeo.
+        </p>
       </div>
 
-      <div className="grid grid-cols-2 gap-6 sm:grid-cols-4">
-        {lista.map((d) => (
-          <CardDepoimento key={d.id} depoimento={d} onClick={() => setSelecionadoId(d.id)} />
-        ))}
-        {lista.length === 0 && <p style={{ color: coresSala7.texto }}>Nenhum depoimento ainda.</p>}
+      <div className="absolute inset-x-0 text-center" style={{ top: g(titulo.y) }}>
+        <h1
+          className="uppercase"
+          style={{
+            color: coresSala7.texto,
+            fontSize: g(titulo.texto),
+            fontWeight: PESO.heavy,
+            lineHeight: 1,
+          }}
+        >
+          {/*
+            A entreletra do CSS entra também **depois** do último caractere, e essa
+            sobra invisível conta na hora de centralizar — o texto sairia meia
+            entreletra à esquerda do centro. Aplicá-la num `inline-block` com margem
+            negativa de mesmo valor tira a sobra da largura, e aí o centro do bloco
+            volta a ser o centro do que se vê.
+          */}
+          <span
+            className="inline-block"
+            style={{ letterSpacing: g(titulo.tracking), marginRight: g(-titulo.tracking) }}
+          >
+            Galeria de
+          </span>
+        </h1>
+        <p
+          className="mx-auto"
+          style={{
+            marginTop: g(subtitulo.y - titulo.y - titulo.texto),
+            maxWidth: g(subtitulo.largura),
+            color: coresSala7.textoSuave,
+            fontSize: g(subtitulo.texto),
+            fontWeight: PESO.medium,
+            letterSpacing: g(subtitulo.tracking),
+            lineHeight: `${subtitulo.entrelinha / subtitulo.texto}`,
+          }}
+        >
+          O Museu do Sertão já recebeu {numero(depoimentos.length)} visitantes de {numero(estados)} estados e{" "}
+          {numero(paises)} países.
+        </p>
       </div>
 
-      <div className="absolute right-8 top-32 sm:right-12">
+      <Logo
+        variante="escura2-vertical"
+        style={{ position: "absolute", left: g(logo.x), top: g(logo.y), width: g(logo.largura) }}
+      />
+
+      {/* Flutua sobre a quarta coluna — por isso vem depois da grade na pilha. */}
+      <div className="absolute z-10" style={{ left: g(filtro.x), top: g(filtro.y) }}>
         <PainelFiltro tipo={tipo} ordenacao={ordenacao} onTipoChange={setTipo} onOrdenacaoChange={setOrdenacao} />
       </div>
+
+      <div
+        className="grid"
+        style={{
+          paddingTop: g(grade.topo),
+          paddingLeft: g(grade.margem),
+          paddingRight: g(grade.margem),
+          gridTemplateColumns: `repeat(${grade.colunas}, 1fr)`,
+          gap: g(grade.calha),
+        }}
+      >
+        {lista.map((depoimento) => (
+          <CardDepoimento
+            key={depoimento.id}
+            depoimento={depoimento}
+            onClick={() => setSelecionadoId(depoimento.id)}
+          />
+        ))}
+      </div>
+
+      {lista.length === 0 && (
+        <p
+          className="text-center"
+          style={{ paddingTop: g(80), color: coresSala7.textoSuave, fontSize: g(subtitulo.texto) }}
+        >
+          Nenhum depoimento ainda.
+        </p>
+      )}
     </div>
   );
 }

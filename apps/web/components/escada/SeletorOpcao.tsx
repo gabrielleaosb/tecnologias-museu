@@ -38,18 +38,43 @@ export function SeletorOpcao({
         type="button"
         disabled={desabilitado}
         onClick={() => setAberto(true)}
-        className="flex items-center justify-center disabled:cursor-not-allowed enabled:cursor-pointer"
+        className="flex items-center justify-center overflow-hidden disabled:cursor-not-allowed enabled:cursor-pointer"
         style={{ ...estilo, gap: "0.6vw", opacity: desabilitado ? 0.45 : 1 }}
+        // O nome inteiro continua acessível a quem não o vê truncado.
+        title={valor || placeholder}
       >
         {/* Escolhido sai em Heavy, como o valor digitado dos outros campos; o
             placeholder fica em Medium, para os dois não se confundirem. */}
-        <span style={{ fontWeight: valor ? 900 : 500, opacity: valor ? 1 : 0.75 }}>
+        <span
+          style={{
+            fontWeight: valor ? 900 : 500,
+            opacity: valor ? 1 : 0.75,
+            /**
+             * Nome longo é cortado com reticências dentro da barra, em vez de
+             * quebrar em duas linhas e vazar por cima e por baixo dela — a barra
+             * tem altura fixa (5.37vh) e não acompanha a segunda linha.
+             *
+             * Não é um caso de tela estreita: a fonte é medida em vw, mas a
+             * entreletra do campo é 3,4px **fixos**, então quanto menor a tela,
+             * maior a fatia da barra que os 18 espaços de "Rio Grande do Norte"
+             * ocupam. A 1920 ele cabe raspando; a 1366 já quebra.
+             *
+             * `minWidth: 0` é o que faz o corte acontecer: sem ele o span é um
+             * item flex, cuja largura mínima automática é a do conteúdo, e ele
+             * empurra para fora do botão em vez de encolher.
+             */
+            minWidth: 0,
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
+          }}
+        >
           {valor || placeholder}
         </span>
         {/* Sem esta seta a barra fica idêntica a um campo de digitação e nada indica
             que ela abre uma lista. Some quando o campo está desabilitado. */}
         {!desabilitado && (
-          <span aria-hidden style={{ fontSize: "0.8vw", lineHeight: 1 }}>
+          <span aria-hidden className="flex-shrink-0" style={{ fontSize: "0.8vw", lineHeight: 1 }}>
             ▼
           </span>
         )}

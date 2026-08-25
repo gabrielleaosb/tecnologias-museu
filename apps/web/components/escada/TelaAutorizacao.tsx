@@ -26,13 +26,16 @@ const XD = {
   /**
    * Metade de cima: ícone no topo, texto logo abaixo.
    *
-   * Os dois ícones não começam na mesma altura no protótipo: o de vídeo mede 156×156
-   * e o de foto 162×131. Como o desenho de foto é mais baixo, ele desce 20px para os
-   * dois terminarem juntos, na mesma linha invisível acima do texto.
+   * O ícone não sai mais daqui — usa `ESCADA.iconeTopo`, o mesmo da tela de origem,
+   * que é a anterior no fluxo. Antes ele tinha um topo por tipo (vídeo 78, foto 98),
+   * copiado do protótipo: lá os desenhos têm alturas diferentes (156×156 e 162×131),
+   * e os 20px desciam o de foto para os dois terminarem na mesma linha. **Os arquivos
+   * reais são 401×401 nos dois casos** e renderizam como o mesmo quadrado de 8.22vw,
+   * então a compensação não tinha mais o que compensar — só deixava o ícone de vídeo
+   * 20px acima do da tela anterior, e ele pulava na virada.
    *
-   * Ícone e texto sobem juntos por `SUBIDA`, mantendo a distância entre eles.
+   * O texto continua subindo por `SUBIDA`.
    */
-  icone: { topo: { video: 78, foto: 98 } },
   titulo: { topo: 362, texto: "2.06vw", altura: 1.32 },
   /** Metade de baixo: a chamada e a caixa de autorização. */
   chamada: { topo: "60.83vh", texto: "2.78vw", espacamento: "5px" },
@@ -83,7 +86,7 @@ export function TelaAutorizacao({
         className="absolute -translate-x-1/2"
         style={{
           left: "50%",
-          top: alturaSubida(XD.icone.topo[tipo]),
+          top: ESCADA.iconeTopo,
           width: ESCADA.icone,
           height: ESCADA.icone,
         }}
