@@ -49,6 +49,18 @@ Sincronização tablet ↔ TV em tempo real via WebSocket (Socket.IO), com o ser
 
 ---
 
+**🐛 BUG CORRIGIDO — a sala travava em "encerrando" (2026-08-26).** A única saída do estado `encerrando` era a TV emitir `sala1:video-finalizado` no evento `ended` do vídeo de despedida. Se a TV estivesse desligada, com autoplay bloqueado ou com problema no arquivo, **a sala ficava presa para sempre** e só voltava reiniciando o servidor. O estado `tema` tinha a mesma fragilidade, e o watchdog de ocioso não cobria nenhum dos dois — só `menu` e `fim-video`.
+
+Corrigido em duas frentes: a ação `ocioso` em `lib/sala1/estado.ts` agora resgata **qualquer** estado, e o `server.ts` agenda watchdog também para os estados que tocam vídeo, com prazos distintos:
+
+| Estado | Prazo | Por quê |
+|---|---|---|
+| `menu`, `fim-video` | 60s | visitante foi embora sem encerrar (comportamento original) |
+| `encerrando` | 60s | o vídeo de despedida é curto |
+| `tema` | 10min | precisa ser maior que o vídeo mais longo, senão corta a exibição no meio |
+
+O caminho normal continua sendo a TV avisar o fim do vídeo — isto é rede de segurança. **Conferir em Piranhas se 10min cobrem o vídeo de tema mais longo.** Verificado com teste ponta a ponta: a sala volta sozinha ao standby 60s depois de entrar em `encerrando`.
+
 ### 2. Escada — Cabine Lambe-Lambe
 
 **O que faz:**  
@@ -157,7 +169,16 @@ Totem com chatbot guiado por menus sobre o tema Cangaço. Não é IA generativa 
 
 **Tratamento de erro:** resposta inválida exibe mensagem de "não entendi" e repete as opções.
 
-**Interação por voz (2026-07-30):** ao contrário das outras salas (touch), a Sala 8 é operada por voz — o visitante fala perto de um microfone e navega respondendo SIM/NÃO ou números (um a cinco). Sem síntese de voz (TTS): a resposta do personagem é só visual (vídeo/texto na tela), só a entrada é por voz. A área do microfone será fisicamente semi-isolada do salão pra reduzir ruído ambiente.
+**Interação por voz (2026-07-30):** a Sala 8 é operada por voz — o visitante fala perto de um microfone e navega respondendo SIM/NÃO ou números (um a cinco). Sem síntese de voz (TTS): a resposta do personagem é só visual (vídeo/texto na tela), só a entrada é por voz. A área do microfone será fisicamente semi-isolada do salão pra reduzir ruído ambiente.
+
+**⚠️ Push-to-talk — o microfone só abre por toque (DECIDIDO 2026-08-26).** O visitante **aperta um botão para ativar o microfone** antes de cada resposta; o reconhecedor não fica escutando sozinho. Isso **revoga** a descrição anterior de que a Sala 8 seria a única sala sem touch: agora são as duas coisas — **toque para ativar, voz para responder**. Consequências:
+
+- **A Sala 8 precisa de entrada de toque.** Ou monitor touch como as outras salas, ou um **botão físico grande (tipo arcade) ligado como tecla** — que numa cabine de museu tende a durar mais que touchscreen e é mais óbvio para o visitante. Decidir antes de comprar o monitor da sala.
+- **Resolve quase todo o problema de ruído ambiente e de quota.** O microfone só está aberto durante a resposta: o totem não reage a conversa de visitante passando, o isolamento acústico deixa de precisar ser perfeito, e some o risco (não medido) de escutar o dia inteiro esbarrar em quota da API do Google. A POC já opera assim — `continuous = false` em `app/sala8/teste-voz/page.tsx`, com botão de ativar/parar; o modo contínuo de lá é só recurso de teste.
+- **Piora o "número um", não melhora.** Os primeiros ~100–300ms depois do `start` se perdem enquanto o pipeline de áudio do Chrome esquenta, e o monossílabo de ~200ms cai exatamente nessa janela. Logo `FRASE_SUGERIDA` continua obrigatória, e **o aviso de "pode falar" na tela só pode aparecer depois do evento `audiostart`**, nunca no instante do toque — senão perde-se a primeira palavra de todo visitante.
+- **A permissão de microfone tem que ser pré-concedida no setup do PC.** Se o Chrome pedir permissão na primeira execução, alguém do museu terá que clicar num diálogo que o visitante não deveria ver. Conceder uma vez no perfil do Chrome usado pelo kiosk (ou via política) entra no checklist de instalação, junto com a exigência do Chrome oficial.
+
+**Em aberto:** o botão é *toque para abrir, fecha sozinho* ao fim da fala, ou *segurar para falar*? Recomendação: o primeiro — segurar exige instrução que ninguém lê e a mão na tela atrapalha. Com auto-fechamento no `speechend` mais um timeout de segurança, o visitante só precisa entender "aperte e fale".
 
 **✅ Protótipo de reconhecimento de voz:** implementado em `/sala8/teste-voz`, usando a Web Speech API nativa do navegador (`SpeechRecognition`, `lang: "pt-BR"`) — sem infra extra, sem custo. A lógica de casamento de comando (normalização de texto + fuzzy match por distância de edição contra o vocabulário fechado sim/não/um-cinco) fica isolada em `lib/sala8/reconhecimentoVoz.ts`.
 
@@ -304,7 +325,24 @@ Ao selecionar um tema no tablet, o vídeo toca na TV **e** o MadMapper dispara, 
 
 **Implementado em `apps/agente-madmapper/`** — pacote independente, com README próprio. Documentação completa de instalação e configuração está lá; o essencial:
 
-**Como o MadMapper é controlado:** por **OSC (Open Sound Control) sobre UDP** — não HTTP. Endereços no formato `/presets/<nome do cue>` (se o nome do cue tem espaço, o endereço tem espaço: `/presets/Cue 1`). Também existem `/presets/next` e `/presets/previous`. A porta de entrada OSC é configurável nas preferências do MadMapper, e ele suporta **OSC Query** para listar os endereços disponíveis — usar isso para descobrir os nomes exatos em vez de adivinhar.
+**Como o MadMapper é controlado:** por **OSC (Open Sound Control) sobre UDP** — não HTTP. A porta de entrada OSC é configurável nas preferências, e ele expõe um servidor **OSC Query** para listar os endereços disponíveis.
+
+**⚠️ CORREÇÃO (2026-08-26): `/presets/...` NÃO EXISTE no MadMapper 6.** A documentação anterior desta seção e o `apps/agente-madmapper/config.example.json` descreviam endereços no formato `/presets/<nome do cue>` — isso vem da documentação de versões antigas e **está errado para a versão em uso**. Verificado contra um MadMapper 6.1.2 real: `GET /presets` no OSC Query responde **404**, e não há nenhum ramo `/presets` na árvore (8.348 endereços inspecionados).
+
+**Espaço de endereços real (MadMapper 6.1.2, verificado):** ramos de topo são `/application`, `/fixtures`, `/master`, `/media`, `/modules`, `/outputs`, `/surfaces`, `/timelines`. Os cues vivem sob `/timelines`, numa grade de banks:
+
+| Endereço | Para que serve |
+|---|---|
+| `/timelines/Bank-1/by_name/<nome do cue>/play` | **É o que o agente deve usar** — dispara o cue pelo nome. Estável a mudanças de posição na grade. |
+| `/timelines/Bank-1/by_cell/col_<n>/cue_row_<m>/play` | Dispara pela posição na grade. Também aceita `stop`, `pause`, `fade_time`, `loop_*`. Frágil: renumerar a grade quebra o mapeamento. |
+| `/timelines/Bank-1/columns/<n>` | Dispara uma coluna inteira. |
+| `/timelines/active_bank` | Troca o bank ativo, se um dia passar de um. |
+
+Os endpoints de disparo têm `TYPE: "N"` (sem argumento) — o agente envia a mensagem OSC sem args, que é exatamente o default do `config.json` quando `args` é omitido. **O codificador OSC do agente não precisa mudar; só os endereços mudam.**
+
+**`by_name` só se popula depois que os cues existirem.** Num projeto Untitled/vazio, `/timelines/Bank-1/by_name` responde como ramo sem filhos — foi o estado encontrado no teste de 2026-08-26. Criar e nomear os cues no MadMapper é pré-requisito para o OSC Query listar qualquer coisa útil.
+
+**Nome do cue com espaço vira endereço com espaço** — `/timelines/Bank-1/by_name/Rio Sao Francisco`. Isso segue valendo. Recomendação: nomear os cues **sem acento e sem espaço** (`Cangaco`, `Cidade`, `RioSaoFrancisco`, `Ferrovia`, `Museu`, `Standby`, `Menu`) para evitar ambiguidade de codificação no caminho.
 
 **Conceito de Cue:** o MadMapper tem uma grade de *Scenes* (restauram o estado completo do documento — surfaces, fixtures, mídias) e *Cues* (guardam um conjunto escolhido de parâmetros). Plano: mapear a maquete uma vez e salvar **um cue por tema** (Cangaço, A Cidade, Rio São Francisco, A Ferrovia, O Museu), cada um definindo qual vídeo toca em qual parte da maquete.
 
@@ -312,7 +350,36 @@ Ao selecionar um tema no tablet, o vídeo toca na TV **e** o MadMapper dispara, 
 
 **Fluxo:** o agente entra na sala como `papel: "madmapper"`, escuta `sala1:estado` e traduz cada estado numa chave (`standby`, `menu`, `tema:<id>`, `fim-video`, `encerrando`) que o `config.json` mapeia para um endereço OSC.
 
-**Status:** codificação OSC validada byte a byte (`npm run verificar`) e fluxo testado ponta a ponta contra servidor simulado — deduplicação, reconexão e estados sem cue configurado, todos conferidos. **Falta testar com MadMapper real.**
+**Status:** codificação OSC validada byte a byte (`npm run verificar`) e fluxo testado ponta a ponta contra servidor simulado — deduplicação, reconexão e estados sem cue configurado, todos conferidos.
+
+**✅ TRANSPORTE VALIDADO CONTRA MADMAPPER REAL (2026-08-26).** Até aqui o codificador OSC só tinha sido conferido contra a especificação, nunca contra o programa. Testado agora com MadMapper 6.1.2 rodando na máquina de Gabriel, usando o `montarMensagemOsc` de produção importado direto de `src/osc.ts` (sem reimplementação): mensagem enviada por UDP 8010 e valor **relido pelo OSC Query** para confirmar que o MadMapper aplicou.
+
+| Mensagem | Antes | Depois | |
+|---|---|---|---|
+| `/master/test_pattern i:1` | `false` | `true` | ✅ |
+| `/master/master_level f:0.5` | `1` | `0.5` | ✅ |
+| `/master/freeze_video_output i:1` | `false` | `true` | ✅ |
+
+Confirma: **int32 e float32 corretos** (o `f:0.5` chegando íntegro valida o big-endian do `writeFloatBE`), **porta 8010/UDP correta na prática**, e o elo agente→MadMapper funcionando. **Não depende de cues existirem** — usa endereços do `/master`, presentes até em projeto vazio, então esse resultado vale para qualquer PC e qualquer projeto. O teste restaura os valores originais ao final.
+
+**✅ CADEIA COMPLETA VALIDADA (2026-08-26).** Com o app rodando e um MadMapper real na mesma máquina, o percurso **tablet → servidor → agente → OSC → MadMapper** foi executado ponta a ponta pela primeira vez, percorrendo `standby → menu → tema:cidade → fim-video → menu → tema:cangaco → fim-video → encerrando`, com o MadMapper reagindo a cada troca. Era o maior risco técnico não medido da Sala 1.
+
+**❌ CUES DESCARTADOS EM FAVOR DA TROCA DE MÍDIA (2026-08-26).** Descoberto na prática que **um cue recém-criado no MadMapper nasce vazio**: ele dispara sem erro e não muda nada. Preenchê-lo exige entrar no modo de edição (botão `Edit` no rodapé do painel de cues) — um ritual manual que alguém teria que repetir sem errar, no museu, para cada um dos sete estados, com falha silenciosa se errasse.
+
+A alternativa foi testada e funciona: **trocar a mídia de cada superfície por nome**, com `/surfaces/<superfície>/visual/name`. Faz sentido porque, como o projetor segue a mesma lógica da TV (um vídeo por tema), **o trabalho do MadMapper é só a deformação geométrica sobre a maquete** — ele não precisa orquestrar nada. O setup no museu vira: mapear as superfícies uma vez e carregar os vídeos com os nomes certos.
+
+O `config.json` foi generalizado para **uma lista de mensagens OSC por estado**, então as duas formas ficam disponíveis editando só o JSON, sem tocar em código — se em Piranhas a maquete exigir cues, basta trocar os endereços.
+
+**✅ Acesso ao MadMapper obtido (2026-08-26).** Gabriel recebeu licença para testar e desenvolver, então o teste com MadMapper real pode ser feito **na máquina dele, sem depender do museu** — o agente aponta para `http://localhost:3000` em vez da VPS, e o MadMapper roda em `127.0.0.1`. Ordem para levantar isso:
+
+1. ~~Descobrir a porta OSC~~ ✅ **RESOLVIDO: porta 8010, UDP.** Confirmado de duas formas independentes — o processo `MadMapper.exe` escuta em **UDP 8010** (`0.0.0.0`) e serve o **OSC Query em TCP 8010**; e o próprio `HOST_INFO` do OSC Query responde `"OSC_PORT": 8010, "OSC_TRANSPORT": "UDP"`. É o default do MadMapper e já era o valor do `config.example.json`. **Não precisa mexer na UI para descobrir isso** — basta `Get-NetUDPEndpoint -OwningProcess <pid>` ou consultar `http://127.0.0.1:8010/?HOST_INFO`.
+2. ~~Dump do OSC Query~~ ✅ **FEITO (2026-08-26)** — 8.348 endereços. Resultado: `/presets` não existe; os cues ficam em `/timelines/Bank-1/by_name/...`. Ver a correção acima.
+3. **Criar os cues** no projeto do MadMapper, um por estado: `Standby`, `Menu` e os cinco temas. **Este é o passo que falta e é bloqueante** — enquanto o projeto estiver vazio, `by_name` não lista nada e não há o que configurar. Nomear sem acento e sem espaço.
+4. ~~Reescrever `config.example.json`~~ ✅ **FEITO (2026-08-26)** — endereços reais, formato de lista, e a decisão de usar troca de mídia em vez de cues. Ver acima e o README do agente.
+
+**Ferramenta de campo:** `npm run verificar-real` (em `apps/agente-madmapper/`) envia OSC de verdade e relê o valor pelo OSC Query para confirmar que o MadMapper aplicou. Usa endereços de `/master`, que existem mesmo em projeto vazio — **não depende de cues nem superfícies configuradas** — e restaura os valores no final. É o "o OSC está chegando?" em dez segundos, para usar em Piranhas antes de procurar problema em cue, projetor ou rede.
+
+Isso permite fechar a dúvida #8 e validar a integração **antes** de ir a Piranhas — hoje o maior risco não medido do projeto, já que a calibração da projeção sobre a maquete só pode ser feita presencialmente.
 
 **Pendências:** salvar os cues no MadMapper (um por tema) e obter os nomes exatos via OSC Query, confirmar a porta OSC, e definir em qual PC do museu o agente roda. Os endereços em `config.example.json` são placeholders não verificados.
 
@@ -355,6 +422,49 @@ Inclui root completo, Docker/Docker Compose, backup semanal e domínio por 1 ano
    - **`tsx` foi movido de devDependencies para dependencies** — é dependência de produção de fato, já que `npm run start` executa `server.ts` e as migrations direto em TypeScript. Sem isso o `--omit=dev` gera uma imagem que builda e quebra no boot.
    - **Próximo corte disponível:** `public/` são 57 MB dentro da imagem (42 MB de vídeo da Sala 1 + 14 MB de imagem). Sai de graça junto com a melhoria 1 desta lista — servindo estáticos pelo Caddy a partir de um volume, em vez de embutir na imagem.
 
+### Arquitetura física da Sala 1 (DEFINIDA 2026-08-26)
+
+**Os "tablets" do projeto não são Android — são telas touch ligadas ao PC**, extensões do computador em formato menor. Isso vale para todas as salas e fecha a arquitetura da Sala 1 num **único PC com três saídas de vídeo**:
+
+```
+PC da Sala 1
+├── saída 1 → tela touch ("tablet") → Chromium kiosk em /sala1/tablet
+├── saída 2 → TV                    → Chromium kiosk em /sala1/tv
+└── saída 3 → projetor              → MadMapper (maquete)
+    + agente MadMapper em segundo plano
+```
+
+**Consequências:**
+
+- **Reforça a RTX 4060 para a Sala 1**: não é só o MadMapper, a máquina precisa de três saídas simultâneas.
+- **Armadilha do kiosk:** duas janelas do Chrome em monitores diferentes exigem `--user-data-dir` **distinto** para cada uma. Sem isso o segundo comando não abre janela nova — o Chrome vê a instância já rodando e abre só uma aba na primeira janela. Resultado: as duas telas no mesmo monitor e nada no outro, com sintoma que não sugere a causa. Documentado em `AUTOMACAO-PCS.md`.
+- **DECIDIDO (2026-08-26): nada roda localmente. Tudo na VPS.** Com as três saídas na mesma máquina, a Sala 1 seria tecnicamente autocontida e um servidor local a deixaria imune a queda de internet — a opção foi levantada e **descartada por decisão de Gabriel**. Motivo: uma única infraestrutura, um único lugar para atualizar, um único lugar para diagnosticar. Nenhum PC do museu roda servidor, banco ou Docker; os PCs só rodam navegador (e, na Sala 1, MadMapper + agente).
+  - **Risco aceito:** se a internet do museu cair, **todas** as salas param, inclusive a Sala 1 e a Sala 6, que não precisariam da rede por natureza.
+  - **Mitigação que já existe:** a recuperação é automática. O agente reconecta sozinho com backoff e **redispara o cue atual ao reconectar**; os navegadores das telas voltam sozinhos quando a rede retorna. Ninguém precisa tocar em nada — verificado no teste de queda de rede previsto em `INSTALACAO-MUSEU.md`.
+  - **Consequência prática:** a estabilidade da internet do museu vira requisito de operação, não detalhe. Medir isso está na primeira hora do dia 1 do guia de instalação.
+
+### Alocação de hardware (2026-08-26)
+
+Duas máquinas foram apresentadas como candidatas. **A carga gráfica do projeto está toda na Sala 1** (MadMapper, projeção mapeada com vídeo sobre a maquete); todas as outras salas são navegador em kiosk. Daí a alocação:
+
+| Máquina | Sala | Por quê |
+|---|---|---|
+| **Intel Core Ultra 7 265** (20 núcleos), RTX 4060, 16 GB RAM, SSD 512 GB, Windows 11 Home | **Sala 1** | Única carga que justifica GPU dedicada: MadMapper fazendo projeção mapeada com vídeo. É também onde roda o `apps/agente-madmapper/`. |
+| **Mini PC N95** (Intel Alder Lake N95, 12ª geração ou mais recente), 16 GB RAM, SSD 500 GB | **Sala 8** | Navegador + STT em nuvem. E **é silencioso** — ver abaixo. |
+
+**Por que a Sala 8 fica com a máquina mais fraca de propósito, e não por falta de opção:**
+
+- **O reconhecimento de voz não roda localmente.** A Web Speech API captura o áudio e o envia ao serviço de nuvem do Google; o PC só renderiza uma página, toca o vídeo do personagem e roda um fuzzy match contra 7 palavras. O gargalo da Sala 8 é a **internet do museu e o microfone**, não CPU nem GPU.
+- **Silêncio do gabinete é especificação técnica nessa sala.** O microfone fica aberto num espaço semi-isolado; uma máquina com RTX 4060 tem ventoinha ativa alimentando ruído de fundo justamente no sistema cuja precisão ainda não foi validada com ruído ambiente. O N95 é passivo ou quase.
+- **Mesmo no plano B (Vosk offline), o N95 basta:** o modelo pt-BR pequeno roda em tempo real com margem em qualquer CPU moderna. A eventual troca de motor não é motivo para escolher a máquina cara.
+
+**Requisitos de compra que valem para qualquer das duas:**
+
+1. **Google Chrome oficial instalado na Sala 8** — não Chromium, não Edge (ver achado crítico na seção Sala 8). Entra no checklist de setup do PC.
+2. **Microfone USB direcional (cardioide)** na Sala 8 — não a entrada P2 nem um microfone de mesa omnidirecional. Pesa mais no sucesso da sala do que a diferença entre as duas máquinas, e o N95 costuma ter só combo jack.
+3. **Rede cabeada onde possível.** Sem internet a Sala 8 simplesmente para — é a única sala com dependência dura de serviço externo.
+4. **Entrada de toque na Sala 8** (monitor touch ou botão físico), pela decisão de push-to-talk — ver seção Sala 8.
+
 ---
 
 ## Dependência Crítica: Escada → Sala 7 (RESOLVIDA)
@@ -367,14 +477,14 @@ Com a decisão de hospedar em VPS (internet estável confirmada no museu), esta 
 
 | # | Dúvida | Impacto |
 |---|---|---|
-| 1 | Qual PC será usado em cada sala? (specs, OS) | Garante compatibilidade do app |
+| 1 | Qual PC será usado em cada sala? (specs, OS) | Garante compatibilidade do app. **Parcialmente resolvida (2026-08-26):** duas máquinas candidatas apresentadas e alocadas — ver "Alocação de hardware" abaixo. Falta confirmar a compra e os PCs das demais salas. |
 | 2 | Quando Gabriel terá acesso ao tablet para testes físicos? | Testes de webcam, touch, modo kiosk |
 | 3 | Conteúdo dos vídeos da Sala 1 — quem fornece e em qual formato? | Precisa estar pronto antes da Sala 1 estar completa (recebido só o template/estrutura até agora) |
 | 4 | Conteúdo do assistente virtual da Sala 8 — os textos completos de cada tema? | Precisa estar pronto antes da Sala 8 estar completa |
 | 5 | Data exata da inauguração? | Define deadline real |
 | 6 | Haverá alguém do museu treinado para operação básica (religar cabo, reiniciar tablet)? | Define o nível do documento de operação a entregar |
 | ~~7~~ | ~~Qual VPS/provedor será usado e quem paga por ela?~~ | ✅ **RESOLVIDA (2026-07-20):** Hostinger VPS KVM 2 (São Paulo), R$ 42,99/mês por 24 meses; conta aberta e paga por boleto pelo próprio museu. Ver "Dimensionamento da VPS" acima. |
-| 8 | Nomes exatos dos cues no MadMapper, porta OSC, e em qual PC do museu roda o agente | Necessários para configurar `apps/agente-madmapper/config.json`. O trigger é da **Sala 1**. |
+| 8 | Nomes exatos dos cues no MadMapper, porta OSC, e em qual PC do museu roda o agente | Necessários para configurar `apps/agente-madmapper/config.json`. O trigger é da **Sala 1**. **Deixou de ser bloqueio externo em 2026-08-26:** Gabriel recebeu acesso ao MadMapper e pode instalá-lo na própria máquina para testar. A porta OSC e os endereços saem do OSC Query; os cues ainda precisam ser criados no projeto do MadMapper. Ver "Integração MadMapper". |
 | ~~9~~ | ~~**Sala 6:** ícones, prints do protótipo e imagens das cartas~~ | ✅ **RESOLVIDA (2026-08-24):** tudo entregue e a sala implementada a partir do PDF. |
 | 10 | **Sala 6: são 2 dificuldades ou 3?** O protótipo só define FÁCIL e DIFÍCIL | O pedido falava em 3 níveis. Foi implementado o que o PDF mostra. Ver seção Sala 6. |
 | 12 | **Sala 6:** o ranking acumula desde a inauguração ou zera periodicamente? | Sem zeragem, em alguns meses o topo fica inalcançável e o placar perde graça para o visitante novo. |
@@ -444,7 +554,14 @@ A Sala 6 entrou no pedido em **2026-08-24**, mais de um mês depois do orçament
 | Agosto semana 4 | Integração, modo kiosk, PM2, testes |
 | Setembro | Buffer: testes no espaço físico, calibração com MadMapper, inauguração |
 
-**⚠️ Situação real em 2026-08-24:** o cronograma acima está estourado. Escada, Sala 7 e Admin estão prontos; a Sala 1 está funcional só em teste local; a **Sala 8 não tem fluxo implementado** (só a POC de voz) e está travada esperando o roteiro; a **Sala 6 acaba de entrar no escopo** e está travada esperando os assets; e **nada foi testado no hardware físico nem foi feito deploy na VPS**. Com a inauguração em setembro, o caminho crítico é: (1) cobrar o roteiro da Sala 8 e os assets da Sala 6, que são bloqueios externos e por isso precisam ser cobrados primeiro; (2) deploy na VPS; (3) validação no hardware do museu.
+**⚠️ Situação real em 2026-08-26:** o cronograma acima está estourado. **Escada, Sala 7, Admin e Sala 6 estão prontos** (a Sala 6 foi entregue em 2026-08-25, e a Sala 7 refeita conforme o protótipo); a Sala 1 está funcional só em teste local; a **Sala 8 não tem fluxo implementado** (só a POC de voz) e segue travada esperando o roteiro; e **nada foi testado no hardware físico nem foi feito deploy na VPS**.
+
+Com a inauguração em setembro, o caminho crítico é:
+
+1. **Cobrar o roteiro da Sala 8** — único bloqueio externo restante, e o único sistema sem fluxo. Precisa ser cobrado primeiro porque não depende de nós.
+2. **Configurar o MadMapper da Sala 1** — deixou de ser bloqueio externo em 2026-08-26, quando Gabriel recebeu acesso ao MadMapper para testar e desenvolver. Ver dúvida #8 e a seção "Integração MadMapper".
+3. **Deploy na VPS** — bloqueado só pelo domínio público (necessário para o HTTPS que a webcam da Escada exige).
+4. **Validação no hardware do museu.**
 
 ---
 

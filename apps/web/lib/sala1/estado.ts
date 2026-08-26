@@ -43,9 +43,14 @@ export function reduzir(estado: Estado, acao: Acao): Estado {
       if (estado.tipo !== "fim-video") return estado;
       return { tipo: "encerrando" };
 
+    // Rede de segurança: leva QUALQUER estado de volta ao standby. Em menu/fim-video
+    // é o visitante que foi embora sem encerrar; em tema/encerrando é a TV que não
+    // avisou o fim do vídeo (desligada, autoplay bloqueado, arquivo com problema).
+    // Sem isso a sala fica presa para sempre, porque a única saída de "encerrando"
+    // é o evento "ended" de um vídeo tocando em OUTRO dispositivo.
     case "ocioso":
-      if (estado.tipo === "menu" || estado.tipo === "fim-video") return { tipo: "standby" };
-      return estado;
+      if (estado.tipo === "standby") return estado;
+      return { tipo: "standby" };
 
     default:
       return estado;

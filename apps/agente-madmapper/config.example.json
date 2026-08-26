@@ -7,16 +7,33 @@
   },
 
   "cues": {
-    "standby": { "endereco": "/presets/Standby" },
-    "menu": { "endereco": "/presets/Menu" },
+    "standby": [
+      { "endereco": "/surfaces/Maquete/visual/name", "args": ["Standby"] }
+    ],
+    "menu": [
+      { "endereco": "/surfaces/Maquete/visual/name", "args": ["Menu"] }
+    ],
 
-    "tema:cangaco": { "endereco": "/presets/Cangaco" },
-    "tema:cidade": { "endereco": "/presets/Cidade" },
-    "tema:rio-sao-francisco": { "endereco": "/presets/Rio Sao Francisco" },
-    "tema:ferrovia": { "endereco": "/presets/Ferrovia" },
-    "tema:museu": { "endereco": "/presets/Museu" },
+    "tema:cangaco": [
+      { "endereco": "/surfaces/Maquete/visual/name", "args": ["Cangaco"] }
+    ],
+    "tema:cidade": [
+      { "endereco": "/surfaces/Maquete/visual/name", "args": ["Cidade"] }
+    ],
+    "tema:rio-sao-francisco": [
+      { "endereco": "/surfaces/Maquete/visual/name", "args": ["RioSaoFrancisco"] }
+    ],
+    "tema:ferrovia": [
+      { "endereco": "/surfaces/Maquete/visual/name", "args": ["Ferrovia"] }
+    ],
+    "tema:museu": [
+      { "endereco": "/surfaces/Maquete/visual/name", "args": ["Museu"] }
+    ],
 
     "fim-video": null,
-    "encerrando": { "endereco": "/presets/Standby" }
+
+    "encerrando": [
+      { "endereco": "/surfaces/Maquete/visual/name", "args": ["Standby"] }
+    ]
   }
 }

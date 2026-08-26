@@ -1,6 +1,6 @@
 import { createSocket } from "node:dgram";
 import { io, type Socket } from "socket.io-client";
-import { carregarConfig, type Cue } from "./config.ts";
+import { carregarConfig, type Acao } from "./config.ts";
 import { descreverMensagem, montarMensagemOsc } from "./osc.ts";
 
 /**
@@ -43,19 +43,21 @@ function main(): void {
   log(`Servidor: ${config.servidorUrl}`);
   log(`MadMapper: ${config.madmapper.host}:${config.madmapper.porta} (OSC/UDP)`);
 
-  function enviarCue(cue: Cue): void {
-    const descricao = descreverMensagem(cue.endereco, cue.args);
+  function enviarAcao(acao: Acao): void {
+    for (const mensagem of acao) {
+      const descricao = descreverMensagem(mensagem.endereco, mensagem.args);
 
-    if (MODO_TESTE) {
-      log(`  [teste] enviaria OSC → ${descricao}`);
-      return;
+      if (MODO_TESTE) {
+        log(`  [teste] enviaria OSC → ${descricao}`);
+        continue;
+      }
+
+      const pacote = montarMensagemOsc(mensagem.endereco, mensagem.args);
+      udp.send(pacote, config.madmapper.porta, config.madmapper.host, (erro) => {
+        if (erro) log(`  ✗ falha ao enviar OSC (${descricao}): ${erro.message}`);
+        else log(`  ✓ OSC enviado → ${descricao}`);
+      });
     }
-
-    const pacote = montarMensagemOsc(cue.endereco, cue.args);
-    udp.send(pacote, config.madmapper.porta, config.madmapper.host, (erro) => {
-      if (erro) log(`  ✗ falha ao enviar OSC (${descricao}): ${erro.message}`);
-      else log(`  ✓ OSC enviado → ${descricao}`);
-    });
   }
 
   // Guarda a última chave disparada: o servidor reemite o estado a cada reconexão
@@ -102,13 +104,13 @@ function main(): void {
       return;
     }
 
-    const cue = config.cues[chave];
-    if (!cue) {
+    const acao = config.cues[chave];
+    if (!acao) {
       log(`  — cue definido como null, nada a disparar.`);
       return;
     }
 
-    enviarCue(cue);
+    enviarAcao(acao);
   });
 
   function encerrar(sinal: string): void {

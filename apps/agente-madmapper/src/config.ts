@@ -5,15 +5,57 @@ import type { ArgumentoOsc } from "./osc.ts";
 
 const RAIZ = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 
-export interface Cue {
+/** Uma mensagem OSC isolada. */
+export interface MensagemOsc {
   endereco: string;
   args?: ArgumentoOsc[];
 }
 
+/**
+ * O que disparar num estado da sala: uma lista de mensagens OSC, enviadas em ordem.
+ *
+ * É lista, e não uma mensagem só, porque a maquete tem várias superfícies e um tema
+ * pode precisar trocar o conteúdo de mais de uma ao mesmo tempo. Também é o que
+ * permite escolher entre as duas formas de comandar o MadMapper sem mexer em código:
+ * disparar um cue nomeado (uma mensagem) ou trocar a mídia de cada superfície
+ * (uma mensagem por superfície). Ver config.example.json.
+ */
+export type Acao = MensagemOsc[];
+
 export interface Config {
   servidorUrl: string;
   madmapper: { host: string; porta: number };
-  cues: Record<string, Cue | null>;
+  cues: Record<string, Acao | null>;
+}
+
+/**
+ * Aceita tanto a forma nova (lista) quanto uma mensagem solta, que era o formato
+ * antigo do config. Poupa reescrever configs já instaladas em campo.
+ */
+function normalizarAcao(chave: string, valor: unknown): Acao | null {
+  if (valor === null || valor === undefined) return null;
+
+  const lista = Array.isArray(valor) ? valor : [valor];
+  if (lista.length === 0) return null;
+
+  return lista.map((item, i) => {
+    const onde = lista.length > 1 ? `${chave}[${i}]` : chave;
+    if (typeof item !== "object" || item === null) {
+      throw new Error(`config.json: cue "${onde}" precisa ser um objeto com "endereco".`);
+    }
+    const endereco = (item as Record<string, unknown>).endereco;
+    if (typeof endereco !== "string" || !endereco.startsWith("/")) {
+      throw new Error(
+        `config.json: cue "${onde}" precisa de um "endereco" começando com "/" ` +
+          `(ou null para não disparar nada nesse estado).`,
+      );
+    }
+    const args = (item as Record<string, unknown>).args;
+    if (args !== undefined && !Array.isArray(args)) {
+      throw new Error(`config.json: cue "${onde}" tem "args" que não é uma lista.`);
+    }
+    return { endereco, args: args as ArgumentoOsc[] | undefined };
+  });
 }
 
 function exigirTexto(objeto: Record<string, unknown>, campo: string): string {
@@ -55,20 +97,14 @@ export function carregarConfig(): Config {
     throw new Error(`config.json: "cues" é obrigatório e deve ser um objeto.`);
   }
 
-  for (const [chave, cue] of Object.entries(cues as Record<string, unknown>)) {
-    if (cue === null) continue;
-    const endereco = (cue as Record<string, unknown>).endereco;
-    if (typeof endereco !== "string" || !endereco.startsWith("/")) {
-      throw new Error(
-        `config.json: cue "${chave}" precisa de um "endereco" começando com "/" ` +
-          `(ou null para não disparar nada nesse estado).`,
-      );
-    }
+  const acoes: Record<string, Acao | null> = {};
+  for (const [chave, valor] of Object.entries(cues as Record<string, unknown>)) {
+    acoes[chave] = normalizarAcao(chave, valor);
   }
 
   return {
     servidorUrl: exigirTexto(dados as Record<string, unknown>, "servidorUrl"),
     madmapper: { host: exigirTexto(madmapper, "host"), porta },
-    cues: cues as Record<string, Cue | null>,
+    cues: acoes,
   };
 }

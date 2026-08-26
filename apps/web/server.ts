@@ -8,7 +8,15 @@ import { setIO } from "@/lib/socket/server-instance";
 const dev = process.env.NODE_ENV !== "production";
 const port = Number(process.env.PORT ?? 3000);
 
+// Visitante parado no menu ou na pergunta "quer ver outro?" — foi embora sem encerrar.
 const TIMEOUT_OCIOSO_MS = 60_000;
+
+// Watchdog dos estados que estão tocando vídeo. A saída normal deles é a TV emitir
+// "sala1:video-finalizado" no "ended"; isto aqui é a rede de segurança para quando
+// esse evento não chega (TV desligada, autoplay bloqueado, arquivo com problema).
+// Precisa ser mais longo que o vídeo mais comprido, senão corta a exibição no meio.
+const WATCHDOG_TEMA_MS = 10 * 60_000;
+const WATCHDOG_ENCERRANDO_MS = 60_000;
 
 const app = next({ dev });
 const handle = app.getRequestHandler();
@@ -24,10 +32,25 @@ app.prepare().then(() => {
   let estado: Estado = { tipo: "standby" };
   let timeoutOcioso: ReturnType<typeof setTimeout> | null = null;
 
+  function prazoDoEstado(): number | null {
+    switch (estado.tipo) {
+      case "menu":
+      case "fim-video":
+        return TIMEOUT_OCIOSO_MS;
+      case "tema":
+        return WATCHDOG_TEMA_MS;
+      case "encerrando":
+        return WATCHDOG_ENCERRANDO_MS;
+      case "standby":
+        return null; // já é o estado de repouso, nada a resgatar
+    }
+  }
+
   function agendarTimeoutOcioso() {
     if (timeoutOcioso) clearTimeout(timeoutOcioso);
-    if (estado.tipo === "menu" || estado.tipo === "fim-video") {
-      timeoutOcioso = setTimeout(() => aplicarAcao({ tipo: "ocioso" }), TIMEOUT_OCIOSO_MS);
+    const prazo = prazoDoEstado();
+    if (prazo !== null) {
+      timeoutOcioso = setTimeout(() => aplicarAcao({ tipo: "ocioso" }), prazo);
     }
   }
 

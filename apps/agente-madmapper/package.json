@@ -8,7 +8,8 @@
     "start": "tsx src/index.ts",
     "teste": "tsx src/index.ts --teste",
     "verificar": "tsx src/verificar-osc.ts",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "verificar-real": "tsx src/verificar-real.ts"
   },
   "dependencies": {
     "socket.io-client": "^4.8.1"
