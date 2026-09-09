@@ -13,7 +13,7 @@ import {
   virar,
   type EstadoJogo,
 } from "@/lib/sala6/jogo";
-import type { Ranking } from "@/app/api/sala6/ranking/route";
+import type { Ranking } from "@/lib/dtos/rankingDto";
 import { TelaMenu } from "@/components/sala6/TelaMenu";
 import { TelaNovoJogo } from "@/components/sala6/TelaNovoJogo";
 import { Tabuleiro } from "@/components/sala6/Tabuleiro";

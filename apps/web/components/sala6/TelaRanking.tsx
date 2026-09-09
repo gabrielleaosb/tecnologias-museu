@@ -4,7 +4,7 @@ import { coresSala6 } from "@/lib/sala6/cores";
 import { d, PESO, TRACKING } from "@/lib/sala6/medidas";
 import { DIFICULDADES, ORDEM_DIFICULDADES, type Dificuldade } from "@/lib/sala6/dificuldades";
 import { formatarTempo } from "@/lib/sala6/jogo";
-import type { LinhaRanking, Ranking } from "@/app/api/sala6/ranking/route";
+import type { LinhaRanking, Ranking } from "@/lib/dtos/rankingDto";
 import { Casa } from "@/components/sala6/Casa";
 import { LogoSala6 } from "@/components/sala6/LogoSala6";
 
